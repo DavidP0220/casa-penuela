@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acuerdo de convivencia · Casa Peñuela</title>
+<meta name="description" content="Cómo cuidamos la casa entre todos: aseo, visitas, plata y respeto. Léelo con calma.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#12141C">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Casa Peñuela">
+<meta property="og:locale" content="es_CO">
+<meta property="og:title" content="Acuerdo de convivencia · Casa Peñuela">
+<meta property="og:description" content="Cómo cuidamos la casa entre todos: aseo, visitas, plata y respeto. Léelo con calma.">
+<meta property="og:url" content="https://davidp0220.github.io/casa-penuela/acuerdo/">
+<meta property="og:image" content="https://davidp0220.github.io/casa-penuela/img/tarjeta-acuerdo.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Acuerdo de convivencia">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="../img/icono.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============ documentos (recibo, estado de cuenta, acuerdo): plantilla de Electromandos ============ */
+.doc{width:860px;background:#12141C;color:#E8E9F0;font-family:'Manrope',system-ui,sans-serif;font-size:13px;line-height:1.55;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:left}
+.doc *{box-sizing:border-box}
+.doc .m{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace}
+.doc .d-top{display:flex;justify-content:space-between;align-items:center;padding:14px 52px;border-bottom:1px solid #262A3A;font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#6E7389;text-transform:uppercase}
+.doc .d-hero{padding:46px 52px 0}
+.doc .d-hero-in{display:flex;gap:34px;align-items:flex-start}
+.doc .d-logo{flex-shrink:0;width:122px;height:122px}
+.doc .d-logo svg,.doc .d-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.doc .d-kicker{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.16em;color:#8B93F8;text-transform:uppercase;margin-bottom:12px}
+.doc h1{font-family:'Sora','Segoe UI',sans-serif;font-size:33px;font-weight:600;line-height:1.14;letter-spacing:-.015em;margin:0;color:#fff}
+.doc .d-cod{font-family:'Sora','Segoe UI',sans-serif;font-size:25px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.doc .d-cod-sub{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#6E7389;text-transform:uppercase;margin-top:5px}
+.doc .d-pad{padding:34px 52px 0}
+.doc .d-partes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid #262A3A;border-radius:12px;overflow:hidden}
+.doc .d-parte{padding:20px 24px}
+.doc .d-parte+.d-parte{border-left:1px solid #262A3A}
+.doc .d-lbl{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9.5px;letter-spacing:.14em;color:#6E7389;text-transform:uppercase;margin-bottom:9px}
+.doc .d-nombre{font-family:'Sora','Segoe UI',sans-serif;font-size:15px;font-weight:600;color:#fff;margin-bottom:7px}
+.doc .d-dato{color:#9CA0B4;font-size:12.5px;line-height:1.7}
+.doc .d-franja{display:grid;background:#171A24;border-radius:12px;overflow:hidden}
+.doc .d-celda{padding:16px 20px}
+.doc .d-celda .d-lbl{font-size:9px;letter-spacing:.13em;margin-bottom:6px}
+.doc .d-val{font-size:13px;color:#E8E9F0;font-weight:600}
+.doc h2{font-family:'Sora','Segoe UI',sans-serif;font-size:19px;font-weight:600;color:#fff;margin:0 0 4px}
+.doc .d-barra{height:2px;width:46px;background:#8B93F8;margin-bottom:22px}
+.doc .d-thead,.doc .d-fila{display:grid;grid-template-columns:96px 1fr 104px 104px 112px}
+.doc .d-thead{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.11em;color:#6E7389;text-transform:uppercase;padding-bottom:9px;border-bottom:1px solid #262A3A}
+.doc .d-r{text-align:right}
+.doc .d-sec{font-family:'Sora','Segoe UI',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;color:#8B93F8;text-transform:uppercase;padding:22px 0 10px}
+.doc .d-fila{padding:11px 0;border-bottom:1px solid #1D2130;align-items:baseline}
+.doc .d-fila .d-n{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10.5px;color:#6E7389}
+.doc .d-fila .d-d{padding-right:14px;color:#E8E9F0;font-weight:500}
+.doc .d-fila .d-d small{display:block;color:#7B8098;font-size:11.5px;margin-top:3px;font-weight:400}
+.doc .d-fila .d-c,.doc .d-fila .d-p,.doc .d-fila .d-s{text-align:right;font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;color:#9CA0B4}
+.doc .d-fila .d-p{color:#4ADE80}
+.doc .d-fila .d-s{color:#E8E9F0;font-weight:500}
+.doc .d-ok{color:#4ADE80}.doc .d-mal{color:#F5B14C}.doc .d-rojo{color:#F87171}
+.doc .d-total{background:linear-gradient(118deg,#2E3474 0%,#4A3A85 100%);border-radius:14px;padding:16px 18px}
+.doc .d-total .d-l2{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.16em;color:#C7CBFF;text-transform:uppercase}
+.doc .d-total .d-big{font-family:'Sora','Segoe UI',sans-serif;font-size:34px;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.1;margin-top:4px}
+.doc .d-total .d-res{color:#C7CBFF;font-size:11.5px;margin-top:5px}
+.doc .d-pares{display:flex;gap:30px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(199,203,255,.24);flex-wrap:wrap}
+.doc .d-pares .d-k{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.11em;color:#C7CBFF;text-transform:uppercase}
+.doc .d-pares .d-v{font-family:'Sora','Segoe UI',sans-serif;font-size:15px;font-weight:600;color:#fff;margin-top:1px}
+.doc .d-notas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.doc .d-nota{background:#171A24;border-radius:11px;padding:18px 20px}
+.doc .d-nota .d-nt{font-family:'Sora','Segoe UI',sans-serif;font-size:13.5px;font-weight:600;color:#fff;margin-bottom:6px}
+.doc .d-nota .d-nb{color:#9CA0B4;font-size:12.5px;line-height:1.6}
+.doc .d-lista{margin:0;padding:0;list-style:none}
+.doc .d-lista li{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #1D2130;color:#E8E9F0;line-height:1.55}
+.doc .d-lista li:last-child{border-bottom:0}
+.doc .d-lista .d-n{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10.5px;color:#6E7389;flex:none;width:26px;padding-top:2px}
+.doc .d-firmas{display:flex;gap:60px;align-items:flex-end;flex-wrap:wrap}
+.doc .d-firmas>div{flex:1 1 200px}
+.doc .d-firmas img{display:block;width:154px;height:auto;margin:0 0 -6px -6px}
+.doc .d-linea{height:1px;background:#3A3F52;margin-bottom:9px;margin-top:46px}
+.doc .d-firmas img+.d-linea{margin-top:0}
+.doc .d-fn{font-family:'Sora','Segoe UI',sans-serif;font-size:13.5px;font-weight:600;color:#fff}
+.doc .d-fs{color:#7B8098;font-size:12px;margin-top:3px}
+.doc .d-pie{margin-top:44px;padding:16px 52px;border-top:1px solid #262A3A;display:flex;justify-content:space-between;gap:16px;font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;color:#565B70}
+/* versión para celular (WhatsApp): 520 px de ancho, cajas apiladas y letras que se leen sin hacer zoom */
+.doc.movil{width:520px}
+.doc.movil .d-top{padding:12px 22px;font-size:9px;gap:10px}
+.doc.movil .d-hero{padding:26px 22px 0}
+.doc.movil .d-hero-in{gap:14px;flex-wrap:wrap;align-items:center}
+.doc.movil .d-logo{width:72px;height:72px}
+.doc.movil h1{font-size:25px}
+.doc.movil .d-hero-in>div:last-child{flex-basis:100%;text-align:left!important;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.doc.movil .d-cod{font-size:19px}
+.doc.movil .d-cod-sub{margin-top:0}
+.doc.movil .d-pad{padding-left:22px;padding-right:22px}
+.doc.movil [style*="52px"]{padding-left:22px!important;padding-right:22px!important}
+.doc.movil .d-partes{grid-template-columns:1fr}
+.doc.movil .d-parte{padding:15px 18px}
+.doc.movil .d-parte+.d-parte{border-left:0;border-top:1px solid #262A3A}
+.doc.movil .d-franja{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.doc.movil .d-celda{padding:12px 16px}
+.doc.movil .d-thead,.doc.movil .d-fila{grid-template-columns:66px 1fr 68px 68px 78px}
+.doc.movil .d-thead{font-size:8px;letter-spacing:.06em}
+.doc.movil .d-fila .d-n{font-size:9.5px;padding-right:8px}
+.doc.movil .d-fila .d-d{font-size:12px;padding-right:8px}
+.doc.movil .d-fila .d-c,.doc.movil .d-fila .d-p,.doc.movil .d-fila .d-s{font-size:10.5px}
+.doc.movil .d-total .d-big{font-size:28px}
+.doc.movil .d-pares{gap:18px}
+.doc.movil .d-notas{grid-template-columns:1fr}
+.doc.movil .d-firmas{gap:22px}
+.doc.movil .d-firmas>div{flex-basis:150px}
+.doc.movil .d-pie{padding:14px 22px;flex-wrap:wrap;margin-top:34px}
+.doc.movil h2{font-size:17px}
+
+
+html{background:#12141C}
+body{margin:0;background:#12141C;color:#E8E9F0;font-family:'Manrope',system-ui,sans-serif;-webkit-text-size-adjust:100%}
+.hoja{max-width:560px;margin:0 auto}
+.doc.movil{width:100%;max-width:560px}
+.doc.movil h1[style]{font-size:clamp(30px,10vw,54px)!important}
+.doc.movil .d-top{flex-wrap:wrap}
+.acciones{padding:28px 22px 56px;text-align:center}
+.boton{display:inline-block;background:linear-gradient(118deg,#2E3474 0%,#4A3A85 100%);color:#fff;font:600 14.5px 'Sora',sans-serif;padding:15px 24px;border-radius:13px;text-decoration:none;letter-spacing:.01em}
+.boton:active{opacity:.85}
+.lista-docs{display:grid;gap:12px;padding:0 22px}
+.lista-docs a{display:block;background:#171A24;border:1px solid #262A3A;border-radius:14px;padding:18px 20px;text-decoration:none;color:#fff}
+.lista-docs b{display:block;font:600 16px 'Sora',sans-serif;margin-bottom:4px}
+.lista-docs span{color:#9CA0B4;font-size:13px;line-height:1.5}
+@media print{.acciones{display:none}.doc.movil{width:520px;max-width:none}}
+</style></head><body><main class="hoja"><div class="doc movil"><div class="d-top"><div>Acuerdo de convivencia · versión 1</div><div>Casa Peñuela</div></div><div class="d-hero"><div class="d-hero-in"><div class="d-logo"><svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Casa Peñuela"><defs><linearGradient id="cpFondo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B44A8"></stop><stop offset="1" stop-color="#4A3A85"></stop></linearGradient><linearGradient id="cpBrillo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".16"></stop><stop offset=".55" stop-color="#FFFFFF" stop-opacity="0"></stop></linearGradient></defs><rect width="120" height="120" rx="30" fill="url(#cpFondo)"></rect><rect width="120" height="120" rx="30" fill="url(#cpBrillo)"></rect><rect x=".75" y=".75" width="118.5" height="118.5" rx="29.25" fill="none" stroke="#C7CBFF" stroke-opacity=".28" stroke-width="1.5"></rect><path d="M34 42 L60 22 L86 42" fill="none" stroke="#F5B14C" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"></path><path d="M40 98 V58 L80 98 V58" fill="none" stroke="#F4F5FB" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></div><div style="flex-grow:1"><div class="d-kicker">Casa Peñuela · convivencia</div><h1>Acuerdo de convivencia</h1></div><div style="flex-shrink:0;text-align:right"><div class="d-cod">v1</div><div class="d-cod-sub">FLORIDABLANCA<br>28 OCT 2026</div></div></div></div><div class="d-pad"><p style="color:#9CA0B4;font-size:13.5px;line-height:1.75;white-space:pre-wrap;margin:0">Esta casa la hacemos entre todos. Estos acuerdos no son para controlar a nadie: son para que cada uno viva tranquilo, para que nadie tenga que andar pendiente de los demás ni de sus cosas, y para que quien llegue se sienta en casa.
+
+Léelos con calma. Si algo no te cuadra, lo hablamos y lo ajustamos juntos: la idea es que todos nos sintamos bien.</p></div><div class="d-pad" style="padding-top:24px"><div class="d-nota" style="border:1px solid rgba(245,177,76,.3);background:#2B2410"><div class="d-nt" style="color:#F5B14C">Lo que sí o sí cuidamos entre todos</div><div class="d-nb">• Lo ajeno se respeta: nada se toma, se usa ni se mueve sin pedir permiso. Si algo se presta, se devuelve igual y a tiempo. En esta casa no se pierde nada.<br>• Nadie maneja si consumió: pedimos un taxi o nos quedamos.<br>• En esta casa no se vende ni se guarda nada para vender. Es la única regla que no se negocia, porque la ley puede hacer responsable al dueño de la casa si en ella se vende o se guarda droga para vender.<br>• La lavadora se usa máximo 3 veces por semana por persona, y con la carga llena. Es lo que más sube la luz, y la luz va incluida en tu cuarto: entre todos la cuidamos. Esto no se negocia.</div></div></div><div class="d-pad" style="padding-top:38px"><h2>Las reglas</h2><div class="d-barra"></div><div class="d-sec">Aseo y orden</div><ul class="d-lista"><li><span class="d-n">01</span><span>Cada uno deja limpio lo que usa: lo que ensucias en la cocina o el baño lo limpias en el momento, sin dejarlo para después.</span></li><li><span class="d-n">02</span><span>El aseo de las zonas comunes lo hacemos por turnos semanales que rotan entre todos, incluido yo. Cuando terminas tu zona, la marcas como hecha.</span></li><li><span class="d-n">03</span><span>La basura se saca cuando se llena, no cuando ya se desborda: quien ve la bolsa llena, la saca.</span></li><li><span class="d-n">04</span><span>Lo tuyo se queda en tu cuarto: nada de ropa, zapatos, platos o empaques tirados en las zonas comunes.</span></li></ul><div class="d-sec">Lo de cada uno</div><ul class="d-lista"><li><span class="d-n">05</span><span>Cada uno está pendiente de lo suyo: sus llaves, su ropa, su plata y sus cosas. Nadie tiene que andar cuidándole nada a otro.</span></li><li><span class="d-n">06</span><span>Los cuartos son privados: nadie entra al cuarto de otro sin su permiso. El mío también es privado, y yo tampoco entro a los de ustedes sin avisar.</span></li><li><span class="d-n">07</span><span>Si falta algo o se daña algo, se avisa pronto y hablando con calma, sin acusar a nadie. Lo que se pierde o se rompe por descuido se repone.</span></li></ul><div class="d-sec">Visitas y fiestas</div><ul class="d-lista"><li><span class="d-n">08</span><span>Las visitas son bienvenidas: avisamos antes de traer a alguien (un mensaje basta). Quien invita responde por sus invitados, y las visitas no se quedan solas en la casa ni entran a los cuartos de otros.</span></li><li><span class="d-n">09</span><span>Para una fiesta o reunión grande avisamos con mínimo 3 días, acordamos la hora de cierre y la organizamos juntos en la app. Todos ayudamos antes y después, y al día siguiente la casa queda limpia.</span></li><li><span class="d-n">10</span><span>En las fiestas los cuartos se cierran con llave y las cosas de valor se guardan.</span></li></ul><div class="d-sec">Consumo y cuidado entre todos</div><ul class="d-lista"><li><span class="d-n">11</span><span>Somos adultos y cada uno responde por lo que consume. Consumimos en las zonas que acordamos (patio o terraza), no en los cuartos de otros, y nadie presiona a otro ni a los invitados a consumir.</span></li><li><span class="d-n">12</span><span>Si alguien se siente mal, no lo dejamos solo: lo acompañamos y, si es serio, llamamos a emergencias (123).</span></li></ul><div class="d-sec">Ruido y vecinos</div><ul class="d-lista"><li><span class="d-n">13</span><span>Cuidamos el descanso de todos y de los vecinos: música y reuniones en un volumen que no se oiga afuera, y más bajito de noche (el horario lo acordamos entre todos).</span></li><li><span class="d-n">14</span><span>Con los vecinos somos amables. Si hay una queja, la escuchamos y la resolvemos juntos.</span></li></ul><div class="d-sec">La plata</div><ul class="d-lista"><li><span class="d-n">15</span><span>Pagamos en la fecha acordada, sin que nadie tenga que recordarlo. Si un mes se complica, avisamos mínimo 2 días antes y buscamos una solución juntos.</span></li><li><span class="d-n">16</span><span>Los servicios (luz, agua, internet) están incluidos en el valor del cuarto: nadie paga nada aparte. A cambio, entre todos cuidamos el consumo para que la casa se pueda sostener.</span></li></ul><div class="d-sec">Luz, agua y consumo</div><ul class="d-lista"><li><span class="d-n">17</span><span>Al salir de un espacio se apaga lo que no se usa: luces, ventiladores, televisor y cargadores.</span></li><li><span class="d-n">18</span><span>Duchas cortas y llaves bien cerradas: el agua también es de todos.</span></li><li><span class="d-n">19</span><span>Los aparatos que gastan mucha energía (plancha, calentador, aire) se usan con criterio y sin dejarlos prendidos de más.</span></li></ul><div class="d-sec">Seguridad</div><ul class="d-lista"><li><span class="d-n">20</span><span>Las llaves son personales: no se prestan ni se copian. Si una se pierde, se avisa de inmediato.</span></li><li><span class="d-n">21</span><span>La puerta se cierra con llave al salir y en la noche. Quien sale último revisa estufa, luces y ventanas.</span></li></ul><div class="d-sec">Hablar y resolver</div><ul class="d-lista"><li><span class="d-n">22</span><span>Si algo molesta, se habla directo, a tiempo y en privado, con respeto (nada de indirectas ni de reclamos por el grupo). Primero se conversa; si se repite, buscamos un acuerdo nuevo juntos.</span></li><li><span class="d-n">23</span><span>Una vez al mes nos sentamos 15 minutos a ver cómo vamos: qué funciona, qué mejorar y qué ajustamos de este acuerdo. La casa la hacemos entre todos.</span></li></ul></div><div class="d-pad" style="padding-top:38px"><h2>Lo que yo me comprometo contigo</h2><div class="d-barra"></div><div class="d-nota"><div class="d-nb" style="color:#E8E9F0">• Respetar tu privacidad: no entro a tu cuarto sin avisarte, salvo una emergencia.<br>• Arreglar a tiempo lo que se dañe en la casa por el uso normal.<br>• Ser claro con la plata: cobrar solo lo acordado, darte recibo de cada pago y mostrarte las cuentas cuando quieras verlas.<br>• Avisarte con tiempo cualquier cambio de precio o de regla, y hablarlo antes con todos.<br>• Cumplir lo mismo que te pido: aseo, orden y cuidar lo ajeno.<br>• Escucharte: si algo te incomoda, lo hablamos con calma, sin gritos ni indirectas.</div></div></div><div class="d-pad" style="padding-top:34px"><p style="color:#9CA0B4;margin:0 0 6px">Leí este acuerdo, lo entiendo y me comprometo a cumplirlo. Si algo cambia, lo hablamos entre todos.</p></div><div class="d-pad" style="padding-top:30px"><div class="d-nota"><div class="d-nt">¿Todo claro?</div><div class="d-nb">Si estás de acuerdo, respóndele a David por WhatsApp: «Leí el acuerdo y estoy de acuerdo». Si algo no te cuadra, lo hablamos con calma.</div></div></div><div class="d-pie"><div>Casa Peñuela · Floridablanca</div><div>Versión 1 · 28 oct 2026</div></div></div><div class="acciones"><a class="boton" href="Acuerdo_de_convivencia.pdf" download>Descargar en PDF</a></div></main></body></html>
