@@ -164,7 +164,15 @@ body{margin:0;background:#12141C;color:#E8E9F0;font-family:'Manrope',system-ui,s
 .v-contador{text-align:right;color:#6E7389;font:500 11px 'IBM Plex Mono',ui-monospace,Consolas,monospace;margin-top:5px}
 .v-ok{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.06)}
 .v-ok-t{font:700 17px 'Sora',sans-serif;color:#4ADE80;margin-top:8px}
+.v-inst{margin-bottom:12px;background:linear-gradient(135deg,rgba(59,68,168,.42),rgba(74,58,133,.38));border-color:#4A3A85}
 .v-inst[hidden]{display:none}
+.v-inst-fila{display:flex;gap:14px;align-items:center}
+.v-inst-fila img{width:52px;height:52px;border-radius:13px;flex:none}
+.v-inst-t{font:700 17px 'Sora','Manrope',sans-serif;color:#fff}
+.v-inst .v-p ol{margin:8px 0 0;padding-left:20px}
+.v-inst .v-p li{margin:5px 0}
+.v-ghost{display:block;margin:8px auto 0;padding:10px 14px;border:0;background:none;color:#9CA0B4;font:600 13px 'Manrope',system-ui,sans-serif;cursor:pointer}
+.v-ghost[hidden]{display:none}
 .v-aviso{padding:60px 26px;text-align:center}
 .v-aviso h1{font:600 22px 'Sora',sans-serif;color:#fff;margin:0 0 12px}
 .v-aviso p{color:#9CA0B4;font-size:14px;line-height:1.7;margin:0}
@@ -990,7 +998,8 @@ function vistaFormularios(pl, ui) {
     + (u.sugHoy ? '<p class="v-msg bien" style="margin-top:12px">✓ Ya le llegó tu sugerencia de hoy. Mañana puedes enviar otra. ¡Gracias!</p>'
       : '<textarea id="v-sug" maxlength="400" rows="3" placeholder="Escribe aquí" aria-label="Tu sugerencia"></textarea><div class="v-contador"><span id="v-cuenta">0</span>/400</div>'
         + '<button id="v-btn-sug" class="v-btn" type="button" disabled>Enviar</button><p id="v-msg-sug" class="v-msg" role="status"></p>') + '</div>';
-  const instalar = '<div class="v-card v-inst" id="v-instalar" hidden><div class="v-k">Ponla como una app</div><p class="v-p" id="v-inst-txt"></p><button id="v-inst-btn" class="v-btn" type="button" hidden>Instalar la app</button></div>';
+  const instalar = '<div class="v-card v-inst" id="v-instalar" hidden><div class="v-inst-fila"><img src="' + dEsc(((ui && ui.base) || '..').replace(/\/+$/, '') + '/img/icono-192.png') + '" alt="" width="52" height="52"><div><div class="v-inst-t">Instala tu app</div><div class="v-sub" style="margin-top:3px">Tu cuenta con un ícono en tu pantalla, sin buscar el enlace.</div></div></div>'
+    + '<div class="v-p" id="v-inst-txt"></div><button id="v-inst-btn" class="v-btn" type="button" hidden>Instalar tu app</button><button id="v-inst-no" class="v-ghost" type="button">Ahora no</button></div>';
   return { acepto, sugerencia, instalar };
 }
 
@@ -1038,10 +1047,10 @@ function vistaHTML(pl, hoy, base, ui) {
   const leer = '<div class="v-enlaces"><a href="' + dEsc(b + '/acuerdo/') + '"><b>Acuerdo de convivencia</b><span>Cómo cuidamos la casa entre todos</span></a>'
     + '<a href="' + dEsc(b + '/lavadora/') + '"><b>Aviso de la lavadora</b><span>Máximo 3 veces por semana por persona</span></a></div>';
 
-  const f = vistaFormularios(pl, ui);
+  const f = vistaFormularios(pl, Object.assign({}, ui || {}, { base }));
   return dTop('Tu cuenta · ' + casa, 'Al ' + fCorta(hoy))
     + '<div class="d-hero"><div class="d-hero-in"><div class="d-logo">' + LOGO_SVG + '</div><div style="flex-grow:1"><div class="d-kicker">Hola, ' + dEsc(nombre1) + '</div><h1>Tu cuenta en la casa</h1></div><div style="display:none"></div></div></div>'
-    + dPad('<div class="v-card v-dias">' + dias + '</div>' + ciclo, 26)
+    + dPad(f.instalar + '<div class="v-card v-dias">' + dias + '</div>' + ciclo, 26)
     + dPad(total, 14)
     + dPad(dSeccion('Tus movimientos') + (libro || '<div class="v-sub">Todavía no hay movimientos.</div>')
       + (prox ? '<div class="d-sec">Lo que viene</div>' + prox : ''), 34)
@@ -1049,7 +1058,6 @@ function vistaHTML(pl, hoy, base, ui) {
     + dPad(dSeccion('Para leer') + leer, 34)
     + dPad(f.acepto, 20)
     + dPad(f.sugerencia, 20)
-    + dPad(f.instalar, 20)
     + dPad('<p class="v-nota">Los días se cuentan solos. Los pagos aparecen cuando ' + dEsc(S.cfg.dueno || 'David') + ' los anota. Lo último que anotó fue el ' + dEsc(gen.dia) + (gen.hora ? ', ' + dEsc(gen.hora) : '') + (/\.$/.test(gen.hora || '') ? ' ' : '. ') + 'Si pagaste después, todavía no se ve. Si algo no te cuadra, escríbele con calma y lo revisamos.</p>', 26)
     + dPie(casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Cuenta al ' + gen.dia);
 }
@@ -1112,14 +1120,15 @@ let EVT_INSTALAR = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); EVT_INSTALAR = e; prepararInstalacion(); });
 window.addEventListener('appinstalled', () => { EVT_INSTALAR = null; prepararInstalacion(); });
 function esInstalada() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+function instalacionPospuesta() { const t = leerMemo('cp_inst_no'); return typeof t === 'number' && Date.now() - t < 7 * 864e5; }   // «Ahora no»: no se vuelve a ofrecer por una semana
 function prepararInstalacion() {
   const caja = byId('v-instalar'), txt = byId('v-inst-txt'), btn = byId('v-inst-btn'); if (!caja) return;
   const ua = navigator.userAgent || '', ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), movil = ios || /Android/.test(ua);
-  if (esInstalada() || (!movil && !EVT_INSTALAR)) { caja.hidden = true; return; }
+  if (esInstalada() || instalacionPospuesta() || (!movil && !EVT_INSTALAR)) { caja.hidden = true; return; }
   caja.hidden = false; btn.hidden = !EVT_INSTALAR;
-  if (EVT_INSTALAR) txt.textContent = 'Instálala y tendrás tu cuenta con un ícono en la pantalla de tu celular, sin buscar el enlace cada vez.';
-  else if (ios) txt.textContent = 'En el iPhone, ábrela en Safari, toca el botón Compartir (el cuadrito con la flecha hacia arriba) y luego «Añadir a pantalla de inicio». Así tendrás tu cuenta con un ícono, sin buscar el enlace.';
-  else txt.textContent = 'Toca los tres puntos del navegador y elige «Instalar app» o «Añadir a la pantalla de inicio». Así tendrás tu cuenta con un ícono, sin buscar el enlace.';
+  if (EVT_INSTALAR) txt.textContent = 'Toca el botón y queda un ícono en la pantalla de tu celular. Se abre como una app, a pantalla completa.';
+  else if (ios) txt.innerHTML = 'En iPhone se instala desde Safari:<ol><li>Si la abriste desde WhatsApp, toca el ícono de la brújula (Abrir en Safari).</li><li>Toca el botón Compartir (el cuadrito con la flecha hacia arriba).</li><li>Elige «Añadir a pantalla de inicio».</li></ol>';
+  else txt.innerHTML = 'En Android:<ol><li>Si la abriste desde WhatsApp, toca los tres puntos ⋮ y «Abrir en Chrome».</li><li>En Chrome, toca otra vez los tres puntos ⋮ y elige «Instalar app» o «Añadir a la pantalla de inicio».</li></ol>';
 }
 async function instalar() { if (!EVT_INSTALAR) return; EVT_INSTALAR.prompt(); try { await EVT_INSTALAR.userChoice; } catch (e) { /* nada */ } EVT_INSTALAR = null; prepararInstalacion(); }
 /* El manifiesto de la app instalada lleva en su dirección de inicio la clave de ESTA persona (solo en su celular), y se registra el servicio que deja abrirla sin internet. */
@@ -1160,7 +1169,7 @@ async function pintar() {
 }
 document.addEventListener('input', e => { const i = e.target && e.target.id; if (i === 'v-nom') actualizarAcepto(); else if (i === 'v-sug') actualizarSug(); });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'v-chk') actualizarAcepto(); });
-document.addEventListener('click', e => { const i = e.target && e.target.id; if (i === 'v-btn-acepto') aceptar(); else if (i === 'v-btn-sug') sugerir(); else if (i === 'v-inst-btn') instalar(); });
+document.addEventListener('click', e => { const i = e.target && e.target.id; if (i === 'v-btn-acepto') aceptar(); else if (i === 'v-btn-sug') sugerir(); else if (i === 'v-inst-btn') instalar(); else if (i === 'v-inst-no') { guardarMemo('cp_inst_no', Date.now()); prepararInstalacion(); } });
 prepararApp();
 pintar();
 window.addEventListener('hashchange', () => { prepararApp(); pintar(); });

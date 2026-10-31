@@ -2337,7 +2337,8 @@ function vistaFormularios(pl, ui) {
     + (u.sugHoy ? '<p class="v-msg bien" style="margin-top:12px">✓ Ya le llegó tu sugerencia de hoy. Mañana puedes enviar otra. ¡Gracias!</p>'
       : '<textarea id="v-sug" maxlength="400" rows="3" placeholder="Escribe aquí" aria-label="Tu sugerencia"></textarea><div class="v-contador"><span id="v-cuenta">0</span>/400</div>'
         + '<button id="v-btn-sug" class="v-btn" type="button" disabled>Enviar</button><p id="v-msg-sug" class="v-msg" role="status"></p>') + '</div>';
-  const instalar = '<div class="v-card v-inst" id="v-instalar" hidden><div class="v-k">Ponla como una app</div><p class="v-p" id="v-inst-txt"></p><button id="v-inst-btn" class="v-btn" type="button" hidden>Instalar la app</button></div>';
+  const instalar = '<div class="v-card v-inst" id="v-instalar" hidden><div class="v-inst-fila"><img src="' + dEsc(((ui && ui.base) || '..').replace(/\/+$/, '') + '/img/icono-192.png') + '" alt="" width="52" height="52"><div><div class="v-inst-t">Instala tu app</div><div class="v-sub" style="margin-top:3px">Tu cuenta con un ícono en tu pantalla, sin buscar el enlace.</div></div></div>'
+    + '<div class="v-p" id="v-inst-txt"></div><button id="v-inst-btn" class="v-btn" type="button" hidden>Instalar tu app</button><button id="v-inst-no" class="v-ghost" type="button">Ahora no</button></div>';
   return { acepto, sugerencia, instalar };
 }
 
@@ -2385,10 +2386,10 @@ function vistaHTML(pl, hoy, base, ui) {
   const leer = '<div class="v-enlaces"><a href="' + dEsc(b + '/acuerdo/') + '"><b>Acuerdo de convivencia</b><span>Cómo cuidamos la casa entre todos</span></a>'
     + '<a href="' + dEsc(b + '/lavadora/') + '"><b>Aviso de la lavadora</b><span>Máximo 3 veces por semana por persona</span></a></div>';
 
-  const f = vistaFormularios(pl, ui);
+  const f = vistaFormularios(pl, Object.assign({}, ui || {}, { base }));
   return dTop('Tu cuenta · ' + casa, 'Al ' + fCorta(hoy))
     + '<div class="d-hero"><div class="d-hero-in"><div class="d-logo">' + LOGO_SVG + '</div><div style="flex-grow:1"><div class="d-kicker">Hola, ' + dEsc(nombre1) + '</div><h1>Tu cuenta en la casa</h1></div><div style="display:none"></div></div></div>'
-    + dPad('<div class="v-card v-dias">' + dias + '</div>' + ciclo, 26)
+    + dPad(f.instalar + '<div class="v-card v-dias">' + dias + '</div>' + ciclo, 26)
     + dPad(total, 14)
     + dPad(dSeccion('Tus movimientos') + (libro || '<div class="v-sub">Todavía no hay movimientos.</div>')
       + (prox ? '<div class="d-sec">Lo que viene</div>' + prox : ''), 34)
@@ -2396,7 +2397,6 @@ function vistaHTML(pl, hoy, base, ui) {
     + dPad(dSeccion('Para leer') + leer, 34)
     + dPad(f.acepto, 20)
     + dPad(f.sugerencia, 20)
-    + dPad(f.instalar, 20)
     + dPad('<p class="v-nota">Los días se cuentan solos. Los pagos aparecen cuando ' + dEsc(S.cfg.dueno || 'David') + ' los anota. Lo último que anotó fue el ' + dEsc(gen.dia) + (gen.hora ? ', ' + dEsc(gen.hora) : '') + (/\.$/.test(gen.hora || '') ? ' ' : '. ') + 'Si pagaste después, todavía no se ve. Si algo no te cuadra, escríbele con calma y lo revisamos.</p>', 26)
     + dPie(casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Cuenta al ' + gen.dia);
 }
@@ -2803,7 +2803,7 @@ function nubeTarjetaPersona(p) {
       + '<p class="mt2"><b>El enlace que se le manda a ' + esc(nom) + ' por WhatsApp:</b></p><p style="word-break:break-all"><small class="mono">' + esc(pub) + '</small></p>'
       + (nubeSugerenciasDe(p).length ? '<p class="mt2">💬 ' + esc(nom) + ' te dejó ' + (nubeSugerenciasDe(p).length === 1 ? 'una sugerencia' : nubeSugerenciasDe(p).length + ' sugerencias') + '. <button class="btn chico" data-a="nubeSugerencias" type="button">Verlas</button></p>' : '')
       + '<div class="fila"><button class="btn primario chico" data-a="nubeCopiarEnlace" data-id="' + p.id + '" type="button">Copiar el enlace para mandar</button>'
-      + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(waLink(p.telefono, 'Hola ' + nom + ', aquí puedes ver tu cuenta de la casa (los días que llevas, lo que debes y tus pagos). Se actualiza sola: ' + pub)) + '">Mandar por WhatsApp</a>'
+      + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(waLink(p.telefono, 'Hola ' + nom + ', esta es tu app de la casa: ahí ves cuántos días llevas, lo que debes, tus pagos y cómo pagar. Se actualiza sola. Ábrela aquí y toca «Instalar tu app» para dejarla en tu pantalla (en iPhone: ábrela en Safari, toca Compartir y «Añadir a pantalla de inicio»): ' + pub)) + '">Mandar por WhatsApp</a>'
       + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(pub) + '">Ver cómo la ve</a>'
       + '<button class="btn chico fantasma" data-a="nubeNuevaClave" data-id="' + p.id + '" type="button">Cambiar el enlace</button></div>';
   }
