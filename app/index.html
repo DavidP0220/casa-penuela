@@ -1237,7 +1237,7 @@ function vistaPersona(id) {
   <div class="dos mt">
     <div class="card"><h3>Pendientes de esta persona</h3>${lista('entrada', 'Al ingresar')}${p.salida ? lista('salida', 'Al irse') : ''}
       <form data-f="tarea" data-id="${p.id}" class="fila mt2"><input name="texto" type="text" placeholder="Agregar un pendiente…" style="flex:1;min-width:160px"><select name="tipo" style="width:auto"><option value="entrada">de ingreso</option><option value="salida">de salida</option></select><button class="btn chico" type="submit">Agregar</button></form>
-      ${p.acuerdo ? `<p class="desde mt2">Aceptó el acuerdo de la casa el ${esc(fCorta(p.acuerdo.fecha))}${p.acuerdo.via === 'celular' ? ' desde su celular y firmó «' + esc(p.acuerdo.nombre || '') + '»' + (p.acuerdo.verificada === true ? ' (cédula verificada)' : (p.acuerdo.verificada === 'david' ? ' (la confirmaste tú)' : '')) : ''}${p.acuerdo.version < S.acuerdoVersion ? ' — <b class="neg">cambió desde entonces</b>' : ''}.</p>` : (S.reglas.length ? '<p class="desde mt2">Aún no ha aceptado el acuerdo de la casa. <a href="#/conv/acuerdo">Ir al acuerdo</a></p>' : '')}
+      ${p.acuerdo ? `<p class="desde mt2">Aceptó el acuerdo de la casa el ${esc(fCorta(p.acuerdo.fecha))}${p.acuerdo.via === 'celular' ? ' desde su celular y firmó «' + esc(p.acuerdo.nombre || '') + '»' + (p.acuerdo.verificada === true ? ' (cédula verificada)' : (p.acuerdo.verificada === 'david' ? ' (la confirmaste tú)' : p.acuerdo.verificada === 'ella' ? ' (su cédula quedó anotada con esta firma)' : '')) : ''}${p.acuerdo.version < S.acuerdoVersion ? ' — <b class="neg">cambió desde entonces</b>' : ''}.</p>` : (S.reglas.length ? '<p class="desde mt2">Aún no ha aceptado el acuerdo de la casa. <a href="#/conv/acuerdo">Ir al acuerdo</a></p>' : '')}
     </div>
     <div class="card"><h3>Cosas a su cargo</h3>
       ${cosasACargo.length || prestadas.length ? '<ul class="lista">' + cosasACargo.map(x => `<li><div class="cuerpo">${esc(x.nombre)} <small>(${esc(x.ubicacion || '')})</small></div>${chip(x.estado === 'Bueno' ? 'verde' : (x.estado === 'Dañado' ? 'rojo' : 'ambar'), x.estado || 'Bueno')}</li>`).join('') + prestadas.map(x => `<li><div class="cuerpo">${x.tipo === 'entrega' ? 'Entregado' : 'Prestado'}: ${esc(x.cosa)} <small>desde ${esc(fCorta(x.fecha))}</small></div>${chip(x.tipo === 'entrega' ? 'gris' : 'ambar', x.tipo === 'entrega' ? 'lo tiene' : 'sin devolver')}</li>`).join('') + '</ul>' : '<p class="muted">Todavía no hay cosas asignadas ni prestadas. Se anotan en <a href="#/conv/cosas">Convivencia → Cosas</a>.</p>'}
@@ -2635,15 +2635,16 @@ function nubeRevisarFirmas() {
     const p = S.personas.find(x => x.claveVista && x.claveVista === a.clave);
     if (!p || !(a.version >= 1) || (p.acuerdo && p.acuerdo.version >= a.version)) return;
     const ref = soloDigitos(p.documento), dig = soloDigitos(a.documento);
-    if (ref && ref === dig) mejor[p.id] = a; else pendientes.push({ a, id: a.id, personaId: p.id, motivo: ref ? 'distinta' : 'sinCedula' });
+    if (!ref && dig.length >= 6) mejor[p.id] = a;   // primera firma: la cédula que escribió queda anotada como la suya
+    else if (ref && ref === dig) mejor[p.id] = a; else pendientes.push({ a, id: a.id, personaId: p.id, motivo: 'distinta' });
   });
   const quitar = S.personas.filter(p => p.acuerdo && p.acuerdo.via === 'celular' && !NUBE.aceptaciones.some(x => x.id === (p.acuerdo.docId || (p.claveVista + '_' + p.acuerdo.version))));
   const antes = JSON.stringify(NUBE.firmasPendientes.map(x => x.id));
   NUBE.firmasPendientes = pendientes;
   const ids = Object.keys(mejor);
   if (ids.length || quitar.length) {
-    mutar((ids.length ? 'Aceptó el acuerdo desde su celular (cédula verificada): ' + ids.map(id => persona(id).nombre).join(', ') : '') + (ids.length && quitar.length ? '. ' : '') + (quitar.length ? 'Se quitó la firma de ' + quitar.map(p => p.nombre).join(', ') + ': ya no está en la nube' : ''), () => {
-      ids.forEach(id => nubeAnotarFirma(persona(id), mejor[id], true));
+    mutar((ids.length ? 'Aceptó el acuerdo desde su celular: ' + ids.map(id => persona(id).nombre).join(', ') : '') + (ids.length && quitar.length ? '. ' : '') + (quitar.length ? 'Se quitó la firma de ' + quitar.map(p => p.nombre).join(', ') + ': ya no está en la nube' : ''), () => {
+      ids.forEach(id => { const p = persona(id), primera = !soloDigitos(p.documento); if (primera) p.documento = soloDigitos(mejor[id].documento); nubeAnotarFirma(p, mejor[id], primera ? 'ella' : true); });
       quitar.forEach(q => { const p = persona(q.id); p.acuerdo = null; const it = (p.lista || []).find(x => /reglas de la casa/i.test(x.texto)); if (it) it.hecho = false; });
     });
   } else if (antes !== JSON.stringify(pendientes.map(x => x.id))) banners();
