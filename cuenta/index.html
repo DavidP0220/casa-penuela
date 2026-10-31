@@ -1000,7 +1000,7 @@ function vistaHTML(pl, hoy, base) {
       + (prox ? '<div class="d-sec">Lo que viene</div>' + prox : ''), 34)
     + dPad(pagar, 26)
     + dPad(dSeccion('Para leer') + leer, 34)
-    + dPad('<p class="v-nota">Los días se cuentan solos. Los pagos aparecen cuando ' + dEsc(S.cfg.dueno || 'David') + ' los anota. Lo último que anotó fue el ' + dEsc(gen.dia) + (gen.hora ? ', ' + dEsc(gen.hora) : '') + '. Si pagaste después, todavía no se ve. Si algo no te cuadra, escríbele con calma y lo revisamos.</p>', 26)
+    + dPad('<p class="v-nota">Los días se cuentan solos. Los pagos aparecen cuando ' + dEsc(S.cfg.dueno || 'David') + ' los anota. Lo último que anotó fue el ' + dEsc(gen.dia) + (gen.hora ? ', ' + dEsc(gen.hora) : '') + (/\.$/.test(gen.hora || '') ? ' ' : '. ') + 'Si pagaste después, todavía no se ve. Si algo no te cuadra, escríbele con calma y lo revisamos.</p>', 26)
     + dPie(casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Cuenta al ' + gen.dia);
 }
 
