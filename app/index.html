@@ -2399,7 +2399,7 @@ const SITIO_PUBLICO = 'https://davidp0220.github.io/casa-penuela/';
    =========================================================================== */
 const NUBE_SDK = '10.14.1';
 const NUBE_META = KEY + '_nube';
-const NUBE = { estado: 'apagada', detalle: '', app: null, au: null, fs: null, auth: null, db: null, user: null, meta: { rev: 0, hash: '', vistas: {} }, subiendo: false, temporizador: null, conflicto: null, desuscribir: null, ultima: null };
+const NUBE = { estado: 'apagada', detalle: '', app: null, au: null, fs: null, auth: null, db: null, user: null, meta: { rev: 0, hash: '', vistas: {} }, subiendo: false, temporizador: null, conflicto: null, desuscribir: null, ultima: null, vistasVerificadas: {} };
 
 function nubePosible() {
   if (DEMO || typeof FIREBASE_CONFIG === 'undefined') return false;
@@ -2648,12 +2648,18 @@ async function nubeSubir() {
 
 /* ---------- la cuenta de cada inquilino ---------- */
 async function nubePublicarVistas() {
-  const { doc, setDoc, deleteDoc, serverTimestamp } = NUBE.fs;
+  const { doc, setDoc, deleteDoc, serverTimestamp, getDocFromServer } = NUBE.fs;
   const ahora = new Date().toISOString(); const vivas = {};
   for (const p of S.personas) {
     vivas[p.id] = true;
     const pl = vistaPayload(S, p, ahora), sinHora = JSON.stringify(Object.assign({}, pl, { generado: '' })), h = nubeHash(sinHora);
-    const previo = NUBE.meta.vistas[p.id];
+    let previo = NUBE.meta.vistas[p.id];
+    if (previo && previo.clave && !NUBE.vistasVerificadas[p.id]) {   // la primera vez en esta sesión se comprueba en el servidor que lo anotado como publicado de verdad esté
+      try {
+        const s = await getDocFromServer(doc(NUBE.db, 'vistas', previo.clave)); NUBE.vistasVerificadas[p.id] = true;
+        if (!s.exists()) { nubeDiag({ ev: 'vista', id: p.id, accion: 'faltaba-en-la-nube' }); previo = { clave: previo.clave }; }   // sin hash: se vuelve a escribir
+      } catch (e) { /* si no se pudo leer, se confía en lo anotado */ }
+    }
     const corta = (p.claveVista || '').slice(0, 4) + '…' + (p.claveVista || '').slice(-3);
     if (previo && previo.clave === p.claveVista && previo.hash === h) { nubeDiag({ ev: 'vista', id: p.id, clave: corta, accion: 'omitida' }); continue; }     // no cambió nada de esta persona: no se vuelve a escribir
     nubeDiag({ ev: 'vista', id: p.id, clave: corta, accion: 'escribiendo', tienePrevio: !!previo });
