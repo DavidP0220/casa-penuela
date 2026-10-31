@@ -1237,7 +1237,7 @@ function vistaPersona(id) {
   <div class="dos mt">
     <div class="card"><h3>Pendientes de esta persona</h3>${lista('entrada', 'Al ingresar')}${p.salida ? lista('salida', 'Al irse') : ''}
       <form data-f="tarea" data-id="${p.id}" class="fila mt2"><input name="texto" type="text" placeholder="Agregar un pendiente…" style="flex:1;min-width:160px"><select name="tipo" style="width:auto"><option value="entrada">de ingreso</option><option value="salida">de salida</option></select><button class="btn chico" type="submit">Agregar</button></form>
-      ${p.acuerdo ? `<p class="desde mt2">Aceptó el acuerdo de la casa el ${esc(fCorta(p.acuerdo.fecha))}${p.acuerdo.version < S.acuerdoVersion ? ' — <b class="neg">cambió desde entonces</b>' : ''}.</p>` : (S.reglas.length ? '<p class="desde mt2">Aún no ha aceptado el acuerdo de la casa. <a href="#/conv/acuerdo">Ir al acuerdo</a></p>' : '')}
+      ${p.acuerdo ? `<p class="desde mt2">Aceptó el acuerdo de la casa el ${esc(fCorta(p.acuerdo.fecha))}${p.acuerdo.via === 'celular' ? ' desde su celular y firmó «' + esc(p.acuerdo.nombre || '') + '»' : ''}${p.acuerdo.version < S.acuerdoVersion ? ' — <b class="neg">cambió desde entonces</b>' : ''}.</p>` : (S.reglas.length ? '<p class="desde mt2">Aún no ha aceptado el acuerdo de la casa. <a href="#/conv/acuerdo">Ir al acuerdo</a></p>' : '')}
     </div>
     <div class="card"><h3>Cosas a su cargo</h3>
       ${cosasACargo.length || prestadas.length ? '<ul class="lista">' + cosasACargo.map(x => `<li><div class="cuerpo">${esc(x.nombre)} <small>(${esc(x.ubicacion || '')})</small></div>${chip(x.estado === 'Bueno' ? 'verde' : (x.estado === 'Dañado' ? 'rojo' : 'ambar'), x.estado || 'Bueno')}</li>`).join('') + prestadas.map(x => `<li><div class="cuerpo">${x.tipo === 'entrega' ? 'Entregado' : 'Prestado'}: ${esc(x.cosa)} <small>desde ${esc(fCorta(x.fecha))}</small></div>${chip(x.tipo === 'entrega' ? 'gris' : 'ambar', x.tipo === 'entrega' ? 'lo tiene' : 'sin devolver')}</li>`).join('') + '</ul>' : '<p class="muted">Todavía no hay cosas asignadas ni prestadas. Se anotan en <a href="#/conv/cosas">Convivencia → Cosas</a>.</p>'}
@@ -2283,7 +2283,8 @@ function vistaPayload(S0, p, ahoraISO) {
   return {
     v: VISTA_V, generado: ahoraISO, acuerdoVersion: S0.acuerdoVersion || 1,
     cfg: { casa: c.casa, dueno: c.dueno, duenoCompleto: c.duenoCompleto, ciudad: c.ciudad, telefonos: c.telefonos || '', correo: c.correo || '', redondeo: c.redondeo, gracia: c.gracia, datosPago: c.datosPago || '', qrs: (c.qrs || []).map(q => ({ nombre: q.nombre, img: q.img })) },
-    persona, cargos, pagos
+    persona, cargos, pagos,
+    aceptacion: p.acuerdo ? { fecha: p.acuerdo.fecha, version: p.acuerdo.version, nombre: p.acuerdo.nombre || '' } : null   // lo que firmó, para que lo vea de vuelta
   };
 }
 
@@ -2317,8 +2318,31 @@ function vistaMovimiento(e) {
     + '<div class="v-ma v-pago">−' + dEsc(pesos(x.monto)) + '<small>Saldo ' + dEsc(pesos(e.saldo)) + '</small></div></div>';
 }
 
+/* Lo único que la persona puede escribir: aceptar el acuerdo con su nombre y dejar una sugerencia corta. Todo lo demás es solo para mirar.
+   ui = lo que recuerda el celular de esa persona: { acepto: {version, fecha, nombre} | null, sugHoy: true|false } */
+function vistaFormularios(pl, ui) {
+  const u = ui || {}, ver = pl.acuerdoVersion || 1, dueno = dEsc((S.cfg && S.cfg.dueno) || 'David');
+  const firmada = pl.aceptacion && pl.aceptacion.version >= ver ? pl.aceptacion : (u.acepto && u.acepto.version >= ver ? u.acepto : null);
+  const vieja = !firmada && ((pl.aceptacion && pl.aceptacion.version < ver) || (u.acepto && u.acepto.version < ver));
+  let acepto;
+  if (firmada) acepto = '<div class="v-card v-ok"><div class="v-k">Acuerdo de convivencia</div><div class="v-ok-t">✓ Aceptaste el acuerdo</div><div class="v-sub">'
+    + (firmada.fecha ? 'El ' + dEsc(fCorta(firmada.fecha)) : '') + (firmada.nombre ? (firmada.fecha ? ' · ' : '') + 'firmaste como «' + dEsc(firmada.nombre) + '»' : '') + '. Gracias.</div></div>';
+  else acepto = '<div class="v-card v-form" id="v-acepto"><div class="v-k">Acuerdo de convivencia</div>'
+    + '<p class="v-p">' + (vieja ? 'El acuerdo cambió desde la última vez que lo aceptaste. Léelo de nuevo (arriba, en «Para leer») y, si estás de acuerdo, vuelve a aceptarlo.' : 'Léelo con calma (arriba, en «Para leer»). Si estás de acuerdo, escribe tu nombre completo y toca Aceptar.') + '</p>'
+    + '<input id="v-nom" class="v-in" type="text" maxlength="80" autocomplete="name" autocapitalize="words" placeholder="Tu nombre completo" aria-label="Tu nombre completo">'
+    + '<label class="v-chk"><input id="v-chk" type="checkbox"><span>Leí el acuerdo de convivencia y lo acepto</span></label>'
+    + '<button id="v-btn-acepto" class="v-btn" type="button" disabled>Aceptar el acuerdo</button><p id="v-msg-acepto" class="v-msg" role="status"></p></div>';
+  const sugerencia = '<div class="v-card v-form" id="v-sugerir"><div class="v-k">Escríbele a ' + dueno + '</div>'
+    + '<p class="v-p">¿Una sugerencia o algo que se pueda mejorar? Cuéntale en pocas palabras. Solo lo lee ' + dueno + '. Si es algo urgente, mejor escríbele por WhatsApp.</p>'
+    + (u.sugHoy ? '<p class="v-msg bien" style="margin-top:12px">✓ Ya le llegó tu sugerencia de hoy. Mañana puedes enviar otra. ¡Gracias!</p>'
+      : '<textarea id="v-sug" maxlength="400" rows="3" placeholder="Escribe aquí" aria-label="Tu sugerencia"></textarea><div class="v-contador"><span id="v-cuenta">0</span>/400</div>'
+        + '<button id="v-btn-sug" class="v-btn" type="button" disabled>Enviar</button><p id="v-msg-sug" class="v-msg" role="status"></p>') + '</div>';
+  const instalar = '<div class="v-card v-inst" id="v-instalar" hidden><div class="v-k">Ponla como una app</div><p class="v-p" id="v-inst-txt"></p><button id="v-inst-btn" class="v-btn" type="button" hidden>Instalar la app</button></div>';
+  return { acepto, sugerencia, instalar };
+}
+
 /* base = dirección del sitio (para los enlaces al acuerdo y al aviso de la lavadora). */
-function vistaHTML(pl, hoy, base) {
+function vistaHTML(pl, hoy, base, ui) {
   const p = S.personas[0], t = tiempoVivido(p, hoy), c = estadoCuenta(S, p, hoy), cic = cicloActual(p, hoy);
   const nombre1 = (p.nombre || '').trim().split(/\s+/)[0] || p.nombre;
   const gen = vistaFechaHora(pl.generado);
@@ -2361,6 +2385,7 @@ function vistaHTML(pl, hoy, base) {
   const leer = '<div class="v-enlaces"><a href="' + dEsc(b + '/acuerdo/') + '"><b>Acuerdo de convivencia</b><span>Cómo cuidamos la casa entre todos</span></a>'
     + '<a href="' + dEsc(b + '/lavadora/') + '"><b>Aviso de la lavadora</b><span>Máximo 3 veces por semana por persona</span></a></div>';
 
+  const f = vistaFormularios(pl, ui);
   return dTop('Tu cuenta · ' + casa, 'Al ' + fCorta(hoy))
     + '<div class="d-hero"><div class="d-hero-in"><div class="d-logo">' + LOGO_SVG + '</div><div style="flex-grow:1"><div class="d-kicker">Hola, ' + dEsc(nombre1) + '</div><h1>Tu cuenta en la casa</h1></div><div style="display:none"></div></div></div>'
     + dPad('<div class="v-card v-dias">' + dias + '</div>' + ciclo, 26)
@@ -2369,6 +2394,9 @@ function vistaHTML(pl, hoy, base) {
       + (prox ? '<div class="d-sec">Lo que viene</div>' + prox : ''), 34)
     + dPad(pagar, 26)
     + dPad(dSeccion('Para leer') + leer, 34)
+    + dPad(f.acepto, 20)
+    + dPad(f.sugerencia, 20)
+    + dPad(f.instalar, 20)
     + dPad('<p class="v-nota">Los días se cuentan solos. Los pagos aparecen cuando ' + dEsc(S.cfg.dueno || 'David') + ' los anota. Lo último que anotó fue el ' + dEsc(gen.dia) + (gen.hora ? ', ' + dEsc(gen.hora) : '') + (/\.$/.test(gen.hora || '') ? ' ' : '. ') + 'Si pagaste después, todavía no se ve. Si algo no te cuadra, escríbele con calma y lo revisamos.</p>', 26)
     + dPie(casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Cuenta al ' + gen.dia);
 }
@@ -2399,7 +2427,7 @@ const SITIO_PUBLICO = 'https://davidp0220.github.io/casa-penuela/';
    =========================================================================== */
 const NUBE_SDK = '10.14.1';
 const NUBE_META = KEY + '_nube';
-const NUBE = { estado: 'apagada', detalle: '', app: null, au: null, fs: null, auth: null, db: null, user: null, meta: { rev: 0, hash: '', vistas: {} }, subiendo: false, temporizador: null, conflicto: null, desuscribir: null, ultima: null, vistasVerificadas: {} };
+const NUBE = { estado: 'apagada', detalle: '', app: null, au: null, fs: null, auth: null, db: null, user: null, meta: { rev: 0, hash: '', vistas: {} }, subiendo: false, temporizador: null, conflicto: null, desuscribir: null, ultima: null, vistasVerificadas: {}, aceptaciones: [], sugerencias: [], desuscribirEntradas: null };
 
 function nubePosible() {
   if (DEMO || typeof FIREBASE_CONFIG === 'undefined') return false;
@@ -2476,6 +2504,10 @@ function nubeTextoEstado() {
   }
 }
 function nubeBanner() {
+  const h = nubeBannerEstado(), n = NUBE.sugerencias.length;
+  return h + (n && NUBE.user ? '<div class="info">💬 Tienes ' + (n === 1 ? '1 sugerencia nueva' : n + ' sugerencias nuevas') + ' de tus inquilinos. <button class="btn chico primario" data-a="nubeSugerencias" type="button">Verlas</button></div>' : '');
+}
+function nubeBannerEstado() {
   const e = NUBE.estado;
   if (e === 'sinSesion') return '<div class="warn">☁ Para ver y guardar tus datos en la nube, entra con tu cuenta de Google. <button class="btn chico primario" data-a="nubeEntrar" type="button">Entrar con Google</button></div>';
   if (e === 'sinConexion') return '<div class="warn">☁ ' + nubeTextoEstado() + '</div>';
@@ -2496,7 +2528,11 @@ async function nubeIniciar() {
     NUBE.app = a.initializeApp(FIREBASE_CONFIG); NUBE.au = au; NUBE.fs = fs; NUBE.auth = au.getAuth(NUBE.app); NUBE.db = fs.getFirestore(NUBE.app);
     au.onAuthStateChanged(NUBE.auth, user => {
       NUBE.user = user; nubeDiag({ ev: 'sesion', hayUsuario: !!user, verificado: !!(user && user.emailVerified) });
-      if (user) nubeConectar(); else { if (NUBE.desuscribir) { NUBE.desuscribir(); NUBE.desuscribir = null; } nubeEstado('sinSesion'); }
+      if (user) nubeConectar(); else {
+        if (NUBE.desuscribir) { NUBE.desuscribir(); NUBE.desuscribir = null; }
+        if (NUBE.desuscribirEntradas) { NUBE.desuscribirEntradas(); NUBE.desuscribirEntradas = null; }
+        NUBE.aceptaciones = []; NUBE.sugerencias = []; nubeEstado('sinSesion');
+      }
     });
     window.addEventListener('online', () => { if (NUBE.estado === 'sinConexion' && NUBE.user) nubeConectar(); });
     setInterval(() => { if (NUBE.estado === 'sinConexion' && NUBE.user && !document.hidden) nubeConectar(); }, 60000);
@@ -2536,7 +2572,7 @@ async function nubeConectar() {
       else if (d.rev > NUBE.meta.rev && (NUBE.meta.rev > 0 ? !sucio : !nubeHayDatos())) await nubeAdoptar(d);   // aparato nuevo y vacío: toma lo de la nube sin preguntar
       else { NUBE.conflicto = d.rev; nubeEstado('conflicto'); nubeResolver(); return; }
     }
-    NUBE.ultima = Date.now(); nubeMetaGuardar(); nubeEstado('conectada'); nubeEscuchar();
+    NUBE.ultima = Date.now(); nubeMetaGuardar(); nubeEstado('conectada'); nubeEscuchar(); nubeEscucharEntradas();
     await nubeSubir();
   } catch (e) {
     const c = nubeCodigo(e); nubeDiag({ ev: 'error', donde: 'conectar', codigo: c, msg: String((e && e.message) || e).slice(0, 300) });
@@ -2567,6 +2603,55 @@ function nubeAdoptarLibre(d) {   // no cambia la pantalla mientras David está l
   nubeAdoptar(d).catch(e => nubeEstado('sinConexion', e));
 }
 
+/* ---------- lo que escriben los inquilinos desde su celular: la firma del acuerdo y las sugerencias (solo David las lee) ---------- */
+function nubeEscucharEntradas() {
+  if (NUBE.desuscribirEntradas) return;
+  const { collection, onSnapshot } = NUBE.fs;
+  const falla = donde => e => nubeDiag({ ev: 'error', donde, codigo: nubeCodigo(e), msg: String((e && e.message) || e).slice(0, 200) });
+  const u1 = onSnapshot(collection(NUBE.db, 'aceptaciones'), snap => { NUBE.aceptaciones = snap.docs.map(d => Object.assign({ id: d.id }, d.data())); nubeAplicarAceptaciones(); }, falla('aceptaciones'));
+  const u2 = onSnapshot(collection(NUBE.db, 'sugerencias'), snap => { NUBE.sugerencias = nubeOrdenarSugerencias(snap.docs.map(d => Object.assign({ id: d.id }, d.data()))); banners(); }, falla('sugerencias'));
+  NUBE.desuscribirEntradas = () => { u1(); u2(); };
+}
+function nubeOrdenarSugerencias(l) { return l.slice().sort((a, b) => ((b.t && b.t.seconds) || 0) - ((a.t && a.t.seconds) || 0)); }
+/* Anota en la ficha de cada persona que aceptó el acuerdo desde su celular (con el nombre que firmó). Solo sube la versión: nunca baja ni pisa una aceptación que ya estaba. */
+function nubeAplicarAceptaciones() {
+  if (NUBE.estado !== 'conectada' || !NUBE.aceptaciones.length) return;
+  if (document.getElementById('dlg').open) { setTimeout(nubeAplicarAceptaciones, 3000); return; }
+  const mejor = {};   // por persona, la versión más alta que firmó
+  NUBE.aceptaciones.forEach(a => {
+    const p = S.personas.find(x => x.claveVista && x.claveVista === a.clave);
+    if (!p || !(a.version >= 1) || (p.acuerdo && p.acuerdo.version >= a.version)) return;
+    if (!mejor[p.id] || mejor[p.id].version < a.version) mejor[p.id] = a;
+  });
+  const ids = Object.keys(mejor); if (!ids.length) return;
+  const nombres = ids.map(id => persona(id).nombre).join(', ');
+  mutar('Aceptó el acuerdo desde su celular: ' + nombres, () => {
+    ids.forEach(id => {
+      const p = persona(id), a = mejor[id], d = a.t && a.t.toDate ? a.t.toDate() : new Date();
+      p.acuerdo = { fecha: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), version: a.version, nombre: a.nombre, via: 'celular' };
+      const it = (p.lista || []).find(x => /reglas de la casa/i.test(x.texto)); if (it) it.hecho = true;
+    });
+  });
+}
+function nubeQuienEs(clave) { const p = S.personas.find(x => x.claveVista && x.claveVista === clave); return p ? p.nombre : 'Enlace anterior (ya cambiado)'; }
+function nubeSugerenciasDe(p) { return p && p.claveVista ? NUBE.sugerencias.filter(s => s.clave === p.claveVista) : []; }
+ACC.nubeSugerencias = () => {
+  const lista = NUBE.sugerencias;
+  if (!lista.length) { ACC.cerrarDlg(); toast('No hay sugerencias nuevas.'); return; }
+  const cuando = s => (s.t && s.t.toDate ? s.t.toDate().toLocaleString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '');
+  dialogo({
+    titulo: 'Sugerencias de tus inquilinos',
+    cuerpo: '<p class="peq">Solo las lees tú. Cuando termines con una, tócale «Ya la leí» y se borra de la nube.</p>' + lista.map(s => '<div class="card" style="margin-top:10px"><b>' + esc(nubeQuienEs(s.clave)) + '</b> <small class="muted">' + esc(cuando(s)) + '</small><p style="white-space:pre-wrap;margin:8px 0">' + esc(s.texto) + '</p><button class="btn chico" data-a="nubeBorrarSugerencia" data-id="' + esc(s.id) + '" type="button">Ya la leí</button></div>').join(''),
+    pie: '<button type="button" class="btn" data-a="cerrarDlg">Cerrar</button>'
+  });
+};
+ACC.nubeBorrarSugerencia = async d => {
+  try {
+    const { doc, deleteDoc } = NUBE.fs; await deleteDoc(doc(NUBE.db, 'sugerencias', d.id));
+    NUBE.sugerencias = NUBE.sugerencias.filter(s => s.id !== d.id); banners(); ACC.nubeSugerencias();
+  } catch (e) { toast('No pude borrarla: ' + nubeCodigo(e), { error: true }); }
+};
+
 /* ---------- dos versiones distintas ---------- */
 function nubeResolver() {
   dialogo({
@@ -2578,13 +2663,13 @@ function nubeResolver() {
 ACC.nubeResolver = nubeResolver;
 ACC.nubeUsarNube = async () => {
   ACC.cerrarDlg();
-  try { const { doc, getDocFromServer } = NUBE.fs; const s = await getDocFromServer(doc(NUBE.db, 'estado', 'principal')); if (s.exists()) await nubeAdoptar(s.data()); NUBE.conflicto = null; NUBE.ultima = Date.now(); nubeEstado('conectada'); nubeEscuchar(); await nubeSubir(); }
+  try { const { doc, getDocFromServer } = NUBE.fs; const s = await getDocFromServer(doc(NUBE.db, 'estado', 'principal')); if (s.exists()) await nubeAdoptar(s.data()); NUBE.conflicto = null; NUBE.ultima = Date.now(); nubeEstado('conectada'); nubeEscuchar(); nubeEscucharEntradas(); await nubeSubir(); }
   catch (e) { nubeEstado('sinConexion', e); }
 };
 ACC.nubeUsarAqui = async () => {
   ACC.cerrarDlg();
   NUBE.meta.rev = NUBE.conflicto || NUBE.meta.rev; NUBE.meta.hash = ''; NUBE.conflicto = null; nubeMetaGuardar();
-  NUBE.ultima = Date.now(); nubeEstado('conectada'); nubeEscuchar(); await nubeSubir();
+  NUBE.ultima = Date.now(); nubeEstado('conectada'); nubeEscuchar(); nubeEscucharEntradas(); await nubeSubir();
 };
 
 /* ---------- subir ---------- */
@@ -2716,6 +2801,7 @@ function nubeTarjetaPersona(p) {
     const nom = primerNombre(p), pub = nubeEnlace(p, true);
     cuerpo = '<p class="peq">Con su enlace ' + esc(nom) + ' ve su propia cuenta en el celular: los días que lleva, lo que debe y sus pagos. Los días se cuentan solos; los pagos aparecen cuando los anotas aquí. No se ve nada de los demás.</p>'
       + '<p class="mt2"><b>El enlace que se le manda a ' + esc(nom) + ' por WhatsApp:</b></p><p style="word-break:break-all"><small class="mono">' + esc(pub) + '</small></p>'
+      + (nubeSugerenciasDe(p).length ? '<p class="mt2">💬 ' + esc(nom) + ' te dejó ' + (nubeSugerenciasDe(p).length === 1 ? 'una sugerencia' : nubeSugerenciasDe(p).length + ' sugerencias') + '. <button class="btn chico" data-a="nubeSugerencias" type="button">Verlas</button></p>' : '')
       + '<div class="fila"><button class="btn primario chico" data-a="nubeCopiarEnlace" data-id="' + p.id + '" type="button">Copiar el enlace para mandar</button>'
       + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(waLink(p.telefono, 'Hola ' + nom + ', aquí puedes ver tu cuenta de la casa (los días que llevas, lo que debes y tus pagos). Se actualiza sola: ' + pub)) + '">Mandar por WhatsApp</a>'
       + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(pub) + '">Ver cómo la ve</a>'

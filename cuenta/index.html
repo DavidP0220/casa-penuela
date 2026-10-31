@@ -18,6 +18,12 @@
 <meta property="og:image:alt" content="Tu cuenta de la casa">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="../img/icono.svg">
+<link rel="manifest" href="manifest.webmanifest" id="v-manifest">
+<link rel="apple-touch-icon" href="../img/icono-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mi cuenta">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -143,6 +149,22 @@ body{margin:0;background:#12141C;color:#E8E9F0;font-family:'Manrope',system-ui,s
 .v-enlaces span{color:#9CA0B4;font-size:12.5px}
 .v-nota{color:#7B8098;font-size:12px;line-height:1.7;margin:0}
 .v-sinred{margin:14px 22px 0;padding:11px 14px;border-radius:12px;background:rgba(245,177,76,.12);border:1px solid rgba(245,177,76,.35);color:#F5B14C;font:600 13px/1.5 'Manrope',sans-serif}
+.v-p{color:#B7BBCD;font-size:13.5px;line-height:1.65;margin:10px 0 0}
+.v-form .v-in,.v-form textarea{display:block;width:100%;box-sizing:border-box;margin-top:12px;padding:13px 14px;border-radius:11px;border:1px solid #2E3347;background:#0F111A;color:#fff;font:500 16px 'Manrope',system-ui,sans-serif;-webkit-appearance:none;appearance:none}
+.v-form textarea{resize:vertical;min-height:88px;line-height:1.5}
+.v-form .v-in:focus,.v-form textarea:focus{outline:2px solid #8B93F8;outline-offset:1px;border-color:transparent}
+.v-chk{display:flex;gap:11px;align-items:flex-start;margin-top:14px;color:#E8E9F0;font-size:13.5px;line-height:1.5;cursor:pointer}
+.v-chk input{width:20px;height:20px;margin:1px 0 0;accent-color:#8B93F8;flex:none}
+.v-btn{display:block;width:100%;margin-top:14px;padding:14px 16px;border:0;border-radius:11px;background:#8B93F8;color:#12141C;font:700 15px 'Sora','Manrope',sans-serif;cursor:pointer}
+.v-btn[hidden]{display:none}
+.v-btn:disabled{opacity:.38;cursor:not-allowed}
+.v-msg{min-height:20px;margin:10px 0 0;font-size:13px;line-height:1.5;color:#9CA0B4}
+.v-msg.mal{color:#FF8A8A}
+.v-msg.bien{color:#4ADE80}
+.v-contador{text-align:right;color:#6E7389;font:500 11px 'IBM Plex Mono',ui-monospace,Consolas,monospace;margin-top:5px}
+.v-ok{border-color:rgba(74,222,128,.4);background:rgba(74,222,128,.06)}
+.v-ok-t{font:700 17px 'Sora',sans-serif;color:#4ADE80;margin-top:8px}
+.v-inst[hidden]{display:none}
 .v-aviso{padding:60px 26px;text-align:center}
 .v-aviso h1{font:600 22px 'Sora',sans-serif;color:#fff;margin:0 0 12px}
 .v-aviso p{color:#9CA0B4;font-size:14px;line-height:1.7;margin:0}
@@ -914,7 +936,8 @@ function vistaPayload(S0, p, ahoraISO) {
   return {
     v: VISTA_V, generado: ahoraISO, acuerdoVersion: S0.acuerdoVersion || 1,
     cfg: { casa: c.casa, dueno: c.dueno, duenoCompleto: c.duenoCompleto, ciudad: c.ciudad, telefonos: c.telefonos || '', correo: c.correo || '', redondeo: c.redondeo, gracia: c.gracia, datosPago: c.datosPago || '', qrs: (c.qrs || []).map(q => ({ nombre: q.nombre, img: q.img })) },
-    persona, cargos, pagos
+    persona, cargos, pagos,
+    aceptacion: p.acuerdo ? { fecha: p.acuerdo.fecha, version: p.acuerdo.version, nombre: p.acuerdo.nombre || '' } : null   // lo que firmó, para que lo vea de vuelta
   };
 }
 
@@ -948,8 +971,31 @@ function vistaMovimiento(e) {
     + '<div class="v-ma v-pago">−' + dEsc(pesos(x.monto)) + '<small>Saldo ' + dEsc(pesos(e.saldo)) + '</small></div></div>';
 }
 
+/* Lo único que la persona puede escribir: aceptar el acuerdo con su nombre y dejar una sugerencia corta. Todo lo demás es solo para mirar.
+   ui = lo que recuerda el celular de esa persona: { acepto: {version, fecha, nombre} | null, sugHoy: true|false } */
+function vistaFormularios(pl, ui) {
+  const u = ui || {}, ver = pl.acuerdoVersion || 1, dueno = dEsc((S.cfg && S.cfg.dueno) || 'David');
+  const firmada = pl.aceptacion && pl.aceptacion.version >= ver ? pl.aceptacion : (u.acepto && u.acepto.version >= ver ? u.acepto : null);
+  const vieja = !firmada && ((pl.aceptacion && pl.aceptacion.version < ver) || (u.acepto && u.acepto.version < ver));
+  let acepto;
+  if (firmada) acepto = '<div class="v-card v-ok"><div class="v-k">Acuerdo de convivencia</div><div class="v-ok-t">✓ Aceptaste el acuerdo</div><div class="v-sub">'
+    + (firmada.fecha ? 'El ' + dEsc(fCorta(firmada.fecha)) : '') + (firmada.nombre ? (firmada.fecha ? ' · ' : '') + 'firmaste como «' + dEsc(firmada.nombre) + '»' : '') + '. Gracias.</div></div>';
+  else acepto = '<div class="v-card v-form" id="v-acepto"><div class="v-k">Acuerdo de convivencia</div>'
+    + '<p class="v-p">' + (vieja ? 'El acuerdo cambió desde la última vez que lo aceptaste. Léelo de nuevo (arriba, en «Para leer») y, si estás de acuerdo, vuelve a aceptarlo.' : 'Léelo con calma (arriba, en «Para leer»). Si estás de acuerdo, escribe tu nombre completo y toca Aceptar.') + '</p>'
+    + '<input id="v-nom" class="v-in" type="text" maxlength="80" autocomplete="name" autocapitalize="words" placeholder="Tu nombre completo" aria-label="Tu nombre completo">'
+    + '<label class="v-chk"><input id="v-chk" type="checkbox"><span>Leí el acuerdo de convivencia y lo acepto</span></label>'
+    + '<button id="v-btn-acepto" class="v-btn" type="button" disabled>Aceptar el acuerdo</button><p id="v-msg-acepto" class="v-msg" role="status"></p></div>';
+  const sugerencia = '<div class="v-card v-form" id="v-sugerir"><div class="v-k">Escríbele a ' + dueno + '</div>'
+    + '<p class="v-p">¿Una sugerencia o algo que se pueda mejorar? Cuéntale en pocas palabras. Solo lo lee ' + dueno + '. Si es algo urgente, mejor escríbele por WhatsApp.</p>'
+    + (u.sugHoy ? '<p class="v-msg bien" style="margin-top:12px">✓ Ya le llegó tu sugerencia de hoy. Mañana puedes enviar otra. ¡Gracias!</p>'
+      : '<textarea id="v-sug" maxlength="400" rows="3" placeholder="Escribe aquí" aria-label="Tu sugerencia"></textarea><div class="v-contador"><span id="v-cuenta">0</span>/400</div>'
+        + '<button id="v-btn-sug" class="v-btn" type="button" disabled>Enviar</button><p id="v-msg-sug" class="v-msg" role="status"></p>') + '</div>';
+  const instalar = '<div class="v-card v-inst" id="v-instalar" hidden><div class="v-k">Ponla como una app</div><p class="v-p" id="v-inst-txt"></p><button id="v-inst-btn" class="v-btn" type="button" hidden>Instalar la app</button></div>';
+  return { acepto, sugerencia, instalar };
+}
+
 /* base = dirección del sitio (para los enlaces al acuerdo y al aviso de la lavadora). */
-function vistaHTML(pl, hoy, base) {
+function vistaHTML(pl, hoy, base, ui) {
   const p = S.personas[0], t = tiempoVivido(p, hoy), c = estadoCuenta(S, p, hoy), cic = cicloActual(p, hoy);
   const nombre1 = (p.nombre || '').trim().split(/\s+/)[0] || p.nombre;
   const gen = vistaFechaHora(pl.generado);
@@ -992,6 +1038,7 @@ function vistaHTML(pl, hoy, base) {
   const leer = '<div class="v-enlaces"><a href="' + dEsc(b + '/acuerdo/') + '"><b>Acuerdo de convivencia</b><span>Cómo cuidamos la casa entre todos</span></a>'
     + '<a href="' + dEsc(b + '/lavadora/') + '"><b>Aviso de la lavadora</b><span>Máximo 3 veces por semana por persona</span></a></div>';
 
+  const f = vistaFormularios(pl, ui);
   return dTop('Tu cuenta · ' + casa, 'Al ' + fCorta(hoy))
     + '<div class="d-hero"><div class="d-hero-in"><div class="d-logo">' + LOGO_SVG + '</div><div style="flex-grow:1"><div class="d-kicker">Hola, ' + dEsc(nombre1) + '</div><h1>Tu cuenta en la casa</h1></div><div style="display:none"></div></div></div>'
     + dPad('<div class="v-card v-dias">' + dias + '</div>' + ciclo, 26)
@@ -1000,17 +1047,92 @@ function vistaHTML(pl, hoy, base) {
       + (prox ? '<div class="d-sec">Lo que viene</div>' + prox : ''), 34)
     + dPad(pagar, 26)
     + dPad(dSeccion('Para leer') + leer, 34)
+    + dPad(f.acepto, 20)
+    + dPad(f.sugerencia, 20)
+    + dPad(f.instalar, 20)
     + dPad('<p class="v-nota">Los días se cuentan solos. Los pagos aparecen cuando ' + dEsc(S.cfg.dueno || 'David') + ' los anota. Lo último que anotó fue el ' + dEsc(gen.dia) + (gen.hora ? ', ' + dEsc(gen.hora) : '') + (/\.$/.test(gen.hora || '') ? ' ' : '. ') + 'Si pagaste después, todavía no se ve. Si algo no te cuadra, escríbele con calma y lo revisamos.</p>', 26)
     + dPie(casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Cuenta al ' + gen.dia);
 }
 
 
-const CONFIG = { api: 'https://firestore.googleapis.com/v1/projects/casa-penuela/databases/(default)/documents', key: 'AIzaSyD6W9Sp91nrU3n7_t50upi_36HmUmXTmTg', base: '..' };
+const PROYECTO = 'casa-penuela';
+const CONFIG = { api: 'https://firestore.googleapis.com/v1/projects/' + PROYECTO + '/databases/(default)/documents', key: 'AIzaSyD6W9Sp91nrU3n7_t50upi_36HmUmXTmTg', base: '..' };
 if (LOCAL && params.get('api')) CONFIG.api = params.get('api');   // solo para pruebas en el computador de David
+let PL = null;
+function byId(id) { return document.getElementById(id); }
+function valor(id) { const e = byId(id); return e ? e.value : ''; }
+function marcado(id) { const e = byId(id); return !!(e && e.checked); }
+function quien() { return (S && S.cfg && S.cfg.dueno) || 'David'; }
 function pantallaAviso(titulo, texto) { return '<div class="doc movil"><div class="v-aviso"><h1>' + dEsc(titulo) + '</h1><p>' + dEsc(texto) + '</p></div></div>'; }
-function claveDeLaUrl() { return decodeURIComponent((location.hash || '').replace(/^#\/?/, '')).trim(); }
 function leerMemo(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
 function guardarMemo(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
+function claveDeLaUrl() {
+  const h = decodeURIComponent((location.hash || '').replace(/^#\/?/, '')).trim();
+  if (h) { guardarMemo('cp_clave', h); return h; }   // se recuerda la última clave abierta en este celular: así la app instalada abre sola la cuenta de quien la usa
+  const g = leerMemo('cp_clave'); return typeof g === 'string' ? g.trim() : '';
+}
+function hoyUTC() { const d = new Date(); return d.getUTCFullYear() + '-' + (d.getUTCMonth() + 1) + '-' + d.getUTCDate(); }
+/* Crea UN documento nuevo (nunca cambia uno que ya existe; las reglas del servidor también lo impiden). Es lo único que esta página escribe. */
+async function escribir(coleccion, id, campos) {
+  const nombre = 'projects/' + PROYECTO + '/databases/(default)/documents/' + coleccion + '/' + id;
+  let r;
+  try { r = await fetch(CONFIG.api + ':commit?key=' + encodeURIComponent(CONFIG.key), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ writes: [{ update: { name: nombre, fields: campos }, currentDocument: { exists: false } }] }) }); }
+  catch (e) { const x = new Error('sin-red'); x.sinRed = true; throw x; }
+  if (!r.ok) { const x = new Error('http-' + r.status); x.status = r.status; throw x; }
+}
+function mensaje(el, texto, tipo) { if (el) { el.textContent = texto; el.className = 'v-msg' + (tipo ? ' ' + tipo : ''); } }
+function textoError(e, accion) {
+  if (e && e.sinRed) return 'No hay internet. Conéctate y vuelve a tocar ' + accion + '.';
+  if (e && e.status === 403) return 'No se pudo guardar. Revisa que tu enlace sea el que te mandó ' + quien() + ' y que la fecha y la hora de tu celular estén bien.';
+  return 'No se pudo guardar (' + ((e && e.status) || 'error') + '). Intenta de nuevo en un rato.';
+}
+function actualizarAcepto() { const b = byId('v-btn-acepto'); if (b) b.disabled = !(valor('v-nom').trim().length >= 3 && marcado('v-chk')); }
+function actualizarSug() { const b = byId('v-btn-sug'), c = byId('v-cuenta'); if (c) c.textContent = valor('v-sug').length; if (b) b.disabled = !valor('v-sug').trim(); }
+async function aceptar() {
+  const clave = claveDeLaUrl(), nom = valor('v-nom').trim().replace(/\s+/g, ' '), btn = byId('v-btn-acepto'), msg = byId('v-msg-acepto');
+  if (!btn || nom.length < 3 || !marcado('v-chk') || !PL) return;
+  const version = PL.acuerdoVersion || 1; btn.disabled = true; mensaje(msg, 'Guardando…', '');
+  let nombreFirmado = nom;
+  try { await escribir('aceptaciones', clave + '_' + version, { clave: { stringValue: clave }, nombre: { stringValue: nom }, version: { integerValue: String(version) }, t: { timestampValue: new Date().toISOString() } }); }
+  catch (e) { if (e.status === 409) nombreFirmado = ''; else { mensaje(msg, textoError(e, 'Aceptar'), 'mal'); actualizarAcepto(); return; } }   // 409: ya estaba aceptado desde otro aparato
+  guardarMemo('cp_acepto_' + clave.slice(0, 10), { version, fecha: hoyReal(), nombre: nombreFirmado });
+  await pintar();
+}
+async function sugerir() {
+  const clave = claveDeLaUrl(), texto = valor('v-sug').trim(), btn = byId('v-btn-sug'), msg = byId('v-msg-sug');
+  if (!btn || !texto) return;
+  btn.disabled = true; mensaje(msg, 'Enviando…', '');
+  try { await escribir('sugerencias', clave + '_' + hoyUTC(), { clave: { stringValue: clave }, texto: { stringValue: texto.slice(0, 400) }, t: { timestampValue: new Date().toISOString() } }); }
+  catch (e) { if (e.status !== 409) { mensaje(msg, textoError(e, 'Enviar'), 'mal'); actualizarSug(); return; } }   // 409: ya envió una hoy
+  guardarMemo('cp_sug_' + clave.slice(0, 10), hoyUTC());
+  await pintar();
+}
+/* Instalar como app: ícono en la pantalla del celular */
+let EVT_INSTALAR = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); EVT_INSTALAR = e; prepararInstalacion(); });
+window.addEventListener('appinstalled', () => { EVT_INSTALAR = null; prepararInstalacion(); });
+function esInstalada() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+function prepararInstalacion() {
+  const caja = byId('v-instalar'), txt = byId('v-inst-txt'), btn = byId('v-inst-btn'); if (!caja) return;
+  const ua = navigator.userAgent || '', ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1), movil = ios || /Android/.test(ua);
+  if (esInstalada() || (!movil && !EVT_INSTALAR)) { caja.hidden = true; return; }
+  caja.hidden = false; btn.hidden = !EVT_INSTALAR;
+  if (EVT_INSTALAR) txt.textContent = 'Instálala y tendrás tu cuenta con un ícono en la pantalla de tu celular, sin buscar el enlace cada vez.';
+  else if (ios) txt.textContent = 'En el iPhone, ábrela en Safari, toca el botón Compartir (el cuadrito con la flecha hacia arriba) y luego «Añadir a pantalla de inicio». Así tendrás tu cuenta con un ícono, sin buscar el enlace.';
+  else txt.textContent = 'Toca los tres puntos del navegador y elige «Instalar app» o «Añadir a la pantalla de inicio». Así tendrás tu cuenta con un ícono, sin buscar el enlace.';
+}
+async function instalar() { if (!EVT_INSTALAR) return; EVT_INSTALAR.prompt(); try { await EVT_INSTALAR.userChoice; } catch (e) { /* nada */ } EVT_INSTALAR = null; prepararInstalacion(); }
+/* El manifiesto de la app instalada lleva en su dirección de inicio la clave de ESTA persona (solo en su celular), y se registra el servicio que deja abrirla sin internet. */
+function prepararApp() {
+  try {
+    const clave = claveDeLaUrl(), enlace = byId('v-manifest'); if (!clave || !enlace || !window.URL || !URL.createObjectURL) return;
+    const base = new URL('./', location.href).href, img = n => new URL('../img/' + n, location.href).href;
+    const m = { name: 'Mi cuenta · Casa Peñuela', short_name: 'Mi cuenta', description: 'Tus días en la casa, lo que debes y tus pagos.', id: base, start_url: base + '#' + clave, scope: base, display: 'standalone', orientation: 'portrait', lang: 'es', background_color: '#12141C', theme_color: '#12141C',
+      icons: [{ src: img('icono-192.png'), sizes: '192x192', type: 'image/png', purpose: 'any' }, { src: img('icono-512.png'), sizes: '512x512', type: 'image/png', purpose: 'any' }, { src: img('icono-maskable-512.png'), sizes: '512x512', type: 'image/png', purpose: 'maskable' }] };
+    enlace.href = URL.createObjectURL(new Blob([JSON.stringify(m)], { type: 'application/manifest+json' }));
+  } catch (e) { /* queda el manifiesto fijo */ }
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || LOCAL)) navigator.serviceWorker.register('sw.js').catch(() => { /* sin servicio, igual funciona */ });
+}
 async function traer() {
   const clave = claveDeLaUrl();
   if (!/^[A-Za-z0-9_-]{20,80}$/.test(clave)) throw new Error('Este enlace está incompleto. Pídele a David que te lo mande otra vez.');
@@ -1024,15 +1146,24 @@ async function traer() {
   const d = await r.json(); const pl = JSON.parse(d.fields.json.stringValue); guardarMemo(memo, pl); return pl;
 }
 async function pintar() {
-  const cont = document.getElementById('app');
+  const cont = byId('app');
+  const borrador = { nom: valor('v-nom'), chk: marcado('v-chk'), sug: valor('v-sug') };   // lo que estaba escribiendo no se pierde si la página se refresca
   try {
-    const pl = await traer();
+    const pl = await traer(); PL = pl;
     S = estadoDesdePayload(pl);
-    cont.innerHTML = '<div class="doc movil">' + (pl.__memoria ? '<div class="v-sinred">Sin internet: te muestro lo último que viste. Los días sí están al día de hoy; los pagos nuevos se ven cuando vuelvas a tener internet.</div>' : '') + vistaHTML(pl, HOY(), CONFIG.base) + '</div>';
+    const clave = claveDeLaUrl(), ui = { acepto: leerMemo('cp_acepto_' + clave.slice(0, 10)), sugHoy: leerMemo('cp_sug_' + clave.slice(0, 10)) === hoyUTC() };
+    cont.innerHTML = '<div class="doc movil">' + (pl.__memoria ? '<div class="v-sinred">Sin internet: te muestro lo último que viste. Los días sí están al día de hoy; los pagos nuevos se ven cuando vuelvas a tener internet.</div>' : '') + vistaHTML(pl, HOY(), CONFIG.base, ui) + '</div>';
+    if (byId('v-nom')) { byId('v-nom').value = borrador.nom; byId('v-chk').checked = borrador.chk; }
+    if (byId('v-sug')) byId('v-sug').value = borrador.sug;
+    actualizarAcepto(); actualizarSug(); prepararInstalacion();
   } catch (e) { cont.innerHTML = pantallaAviso('No pude abrir tu cuenta', (e && e.message) || 'Pídele a David que te mande el enlace otra vez.'); }
 }
+document.addEventListener('input', e => { const i = e.target && e.target.id; if (i === 'v-nom') actualizarAcepto(); else if (i === 'v-sug') actualizarSug(); });
+document.addEventListener('change', e => { if (e.target && e.target.id === 'v-chk') actualizarAcepto(); });
+document.addEventListener('click', e => { const i = e.target && e.target.id; if (i === 'v-btn-acepto') aceptar(); else if (i === 'v-btn-sug') sugerir(); else if (i === 'v-inst-btn') instalar(); });
+prepararApp();
 pintar();
-window.addEventListener('hashchange', pintar);
+window.addEventListener('hashchange', () => { prepararApp(); pintar(); });
 document.addEventListener('visibilitychange', () => { if (!document.hidden) pintar(); });
 
 </script></body></html>
