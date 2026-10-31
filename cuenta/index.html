@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tu cuenta · Casa Peñuela</title>
+<meta name="description" content="Mira cuántos días llevas en la casa, lo que debes y tus pagos. Se actualiza sola.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#12141C">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Casa Peñuela">
+<meta property="og:locale" content="es_CO">
+<meta property="og:title" content="Tu cuenta · Casa Peñuela">
+<meta property="og:description" content="Mira cuántos días llevas en la casa, lo que debes y tus pagos. Se actualiza sola.">
+<meta property="og:url" content="https://davidp0220.github.io/casa-penuela/cuenta/">
+<meta property="og:image" content="https://davidp0220.github.io/casa-penuela/img/tarjeta-cuenta.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Tu cuenta de la casa">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="../img/icono.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ============ documentos (recibo, estado de cuenta, acuerdo): plantilla de Electromandos ============ */
+.doc{width:860px;background:#12141C;color:#E8E9F0;font-family:'Manrope',system-ui,sans-serif;font-size:13px;line-height:1.55;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact;text-align:left}
+.doc *{box-sizing:border-box}
+.doc .m{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace}
+.doc .d-top{display:flex;justify-content:space-between;align-items:center;padding:14px 52px;border-bottom:1px solid #262A3A;font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.14em;color:#6E7389;text-transform:uppercase}
+.doc .d-hero{padding:46px 52px 0}
+.doc .d-hero-in{display:flex;gap:34px;align-items:flex-start}
+.doc .d-logo{flex-shrink:0;width:122px;height:122px}
+.doc .d-logo svg,.doc .d-logo img{width:100%;height:100%;object-fit:contain;display:block}
+.doc .d-kicker{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.16em;color:#8B93F8;text-transform:uppercase;margin-bottom:12px}
+.doc h1{font-family:'Sora','Segoe UI',sans-serif;font-size:33px;font-weight:600;line-height:1.14;letter-spacing:-.015em;margin:0;color:#fff}
+.doc .d-cod{font-family:'Sora','Segoe UI',sans-serif;font-size:25px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.doc .d-cod-sub{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;letter-spacing:.1em;color:#6E7389;text-transform:uppercase;margin-top:5px}
+.doc .d-pad{padding:34px 52px 0}
+.doc .d-partes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid #262A3A;border-radius:12px;overflow:hidden}
+.doc .d-parte{padding:20px 24px}
+.doc .d-parte+.d-parte{border-left:1px solid #262A3A}
+.doc .d-lbl{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9.5px;letter-spacing:.14em;color:#6E7389;text-transform:uppercase;margin-bottom:9px}
+.doc .d-nombre{font-family:'Sora','Segoe UI',sans-serif;font-size:15px;font-weight:600;color:#fff;margin-bottom:7px}
+.doc .d-dato{color:#9CA0B4;font-size:12.5px;line-height:1.7}
+.doc .d-franja{display:grid;background:#171A24;border-radius:12px;overflow:hidden}
+.doc .d-celda{padding:16px 20px}
+.doc .d-celda .d-lbl{font-size:9px;letter-spacing:.13em;margin-bottom:6px}
+.doc .d-val{font-size:13px;color:#E8E9F0;font-weight:600}
+.doc h2{font-family:'Sora','Segoe UI',sans-serif;font-size:19px;font-weight:600;color:#fff;margin:0 0 4px}
+.doc .d-barra{height:2px;width:46px;background:#8B93F8;margin-bottom:22px}
+.doc .d-thead,.doc .d-fila{display:grid;grid-template-columns:96px 1fr 104px 104px 112px}
+.doc .d-thead{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.11em;color:#6E7389;text-transform:uppercase;padding-bottom:9px;border-bottom:1px solid #262A3A}
+.doc .d-r{text-align:right}
+.doc .d-sec{font-family:'Sora','Segoe UI',sans-serif;font-size:11px;font-weight:600;letter-spacing:.1em;color:#8B93F8;text-transform:uppercase;padding:22px 0 10px}
+.doc .d-fila{padding:11px 0;border-bottom:1px solid #1D2130;align-items:baseline}
+.doc .d-fila .d-n{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10.5px;color:#6E7389}
+.doc .d-fila .d-d{padding-right:14px;color:#E8E9F0;font-weight:500}
+.doc .d-fila .d-d small{display:block;color:#7B8098;font-size:11.5px;margin-top:3px;font-weight:400}
+.doc .d-fila .d-c,.doc .d-fila .d-p,.doc .d-fila .d-s{text-align:right;font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;color:#9CA0B4}
+.doc .d-fila .d-p{color:#4ADE80}
+.doc .d-fila .d-s{color:#E8E9F0;font-weight:500}
+.doc .d-ok{color:#4ADE80}.doc .d-mal{color:#F5B14C}.doc .d-rojo{color:#F87171}
+.doc .d-total{background:linear-gradient(118deg,#2E3474 0%,#4A3A85 100%);border-radius:14px;padding:16px 18px}
+.doc .d-total .d-l2{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.16em;color:#C7CBFF;text-transform:uppercase}
+.doc .d-total .d-big{font-family:'Sora','Segoe UI',sans-serif;font-size:34px;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.1;margin-top:4px}
+.doc .d-total .d-res{color:#C7CBFF;font-size:11.5px;margin-top:5px}
+.doc .d-pares{display:flex;gap:30px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(199,203,255,.24);flex-wrap:wrap}
+.doc .d-pares .d-k{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9px;letter-spacing:.11em;color:#C7CBFF;text-transform:uppercase}
+.doc .d-pares .d-v{font-family:'Sora','Segoe UI',sans-serif;font-size:15px;font-weight:600;color:#fff;margin-top:1px}
+.doc .d-notas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.doc .d-nota{background:#171A24;border-radius:11px;padding:18px 20px}
+.doc .d-nota .d-nt{font-family:'Sora','Segoe UI',sans-serif;font-size:13.5px;font-weight:600;color:#fff;margin-bottom:6px}
+.doc .d-nota .d-nb{color:#9CA0B4;font-size:12.5px;line-height:1.6}
+.doc .d-lista{margin:0;padding:0;list-style:none}
+.doc .d-lista li{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid #1D2130;color:#E8E9F0;line-height:1.55}
+.doc .d-lista li:last-child{border-bottom:0}
+.doc .d-lista .d-n{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10.5px;color:#6E7389;flex:none;width:26px;padding-top:2px}
+.doc .d-firmas{display:flex;gap:60px;align-items:flex-end;flex-wrap:wrap}
+.doc .d-firmas>div{flex:1 1 200px}
+.doc .d-firmas img{display:block;width:154px;height:auto;margin:0 0 -6px -6px}
+.doc .d-linea{height:1px;background:#3A3F52;margin-bottom:9px;margin-top:46px}
+.doc .d-firmas img+.d-linea{margin-top:0}
+.doc .d-fn{font-family:'Sora','Segoe UI',sans-serif;font-size:13.5px;font-weight:600;color:#fff}
+.doc .d-fs{color:#7B8098;font-size:12px;margin-top:3px}
+.doc .d-pie{margin-top:44px;padding:16px 52px;border-top:1px solid #262A3A;display:flex;justify-content:space-between;gap:16px;font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:10px;color:#565B70}
+/* versión para celular (WhatsApp): 520 px de ancho, cajas apiladas y letras que se leen sin hacer zoom */
+.doc.movil{width:520px}
+.doc.movil .d-top{padding:12px 22px;font-size:9px;gap:10px}
+.doc.movil .d-hero{padding:26px 22px 0}
+.doc.movil .d-hero-in{gap:14px;flex-wrap:wrap;align-items:center}
+.doc.movil .d-logo{width:72px;height:72px}
+.doc.movil h1{font-size:25px}
+.doc.movil .d-hero-in>div:last-child{flex-basis:100%;text-align:left!important;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.doc.movil .d-cod{font-size:19px}
+.doc.movil .d-cod-sub{margin-top:0}
+.doc.movil .d-pad{padding-left:22px;padding-right:22px}
+.doc.movil [style*="52px"]{padding-left:22px!important;padding-right:22px!important}
+.doc.movil .d-partes{grid-template-columns:1fr}
+.doc.movil .d-parte{padding:15px 18px}
+.doc.movil .d-parte+.d-parte{border-left:0;border-top:1px solid #262A3A}
+.doc.movil .d-franja{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.doc.movil .d-celda{padding:12px 16px}
+.doc.movil .d-thead,.doc.movil .d-fila{grid-template-columns:66px 1fr 68px 68px 78px}
+.doc.movil .d-thead{font-size:8px;letter-spacing:.06em}
+.doc.movil .d-fila .d-n{font-size:9.5px;padding-right:8px}
+.doc.movil .d-fila .d-d{font-size:12px;padding-right:8px}
+.doc.movil .d-fila .d-c,.doc.movil .d-fila .d-p,.doc.movil .d-fila .d-s{font-size:10.5px}
+.doc.movil .d-total .d-big{font-size:28px}
+.doc.movil .d-pares{gap:18px}
+.doc.movil .d-notas{grid-template-columns:1fr}
+.doc.movil .d-firmas{gap:22px}
+.doc.movil .d-firmas>div{flex-basis:150px}
+.doc.movil .d-pie{padding:14px 22px;flex-wrap:wrap;margin-top:34px}
+.doc.movil h2{font-size:17px}
+
+html{background:#12141C}
+body{margin:0;background:#12141C;color:#E8E9F0;font-family:'Manrope',system-ui,sans-serif;-webkit-text-size-adjust:100%}
+#app{max-width:560px;margin:0 auto}
+.doc.movil{width:100%;max-width:560px}
+.doc.movil .d-top{flex-wrap:wrap}
+.v-card{background:#171A24;border:1px solid #262A3A;border-radius:14px;padding:18px 20px}
+.v-k{font-family:'IBM Plex Mono',ui-monospace,Consolas,monospace;font-size:9.5px;letter-spacing:.14em;color:#6E7389;text-transform:uppercase}
+.v-big{font-family:'Sora','Segoe UI',sans-serif;font-size:58px;font-weight:700;color:#fff;letter-spacing:-.03em;line-height:1.05;margin-top:8px}
+.v-big span{font-size:20px;font-weight:600;color:#9CA0B4;letter-spacing:0}
+.v-sub{color:#9CA0B4;font-size:12.5px;line-height:1.6;margin-top:8px}
+.v-fila{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline;margin-top:10px}
+.v-fila b{font:600 17px 'Sora',sans-serif;color:#fff}
+.v-fila span{color:#9CA0B4;font-size:12.5px}
+.v-barra{height:8px;border-radius:99px;background:#262A3A;overflow:hidden;margin-top:12px}
+.v-barra i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#8B93F8,#4A3A85)}
+.v-mov{display:flex;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid #1D2130}
+.v-mi{min-width:0}
+.v-mi b{display:block;font-weight:600;font-size:13px;color:#E8E9F0;line-height:1.4}
+.v-mi small,.v-ma small{display:block;color:#7B8098;font-size:11.5px;margin-top:3px;font-weight:400}
+.v-ma{text-align:right;font:500 13px 'IBM Plex Mono',ui-monospace,Consolas,monospace;color:#E8E9F0;white-space:nowrap}
+.v-ma.v-pago{color:#4ADE80}
+.v-qrs{display:flex;gap:16px;flex-wrap:wrap;margin:14px 0 4px}
+.v-qrs div{text-align:center}
+.v-qrs img{display:block;width:140px;height:140px;object-fit:contain;background:#fff;padding:8px;border-radius:12px}
+.v-qrs span{display:block;color:#7B8098;font-size:12px;margin-top:6px}
+.v-enlaces{display:grid;gap:10px}
+.v-enlaces a{display:block;background:#171A24;border:1px solid #262A3A;border-radius:12px;padding:15px 18px;text-decoration:none;color:#fff}
+.v-enlaces b{display:block;font:600 14.5px 'Sora',sans-serif;margin-bottom:3px}
+.v-enlaces span{color:#9CA0B4;font-size:12.5px}
+.v-nota{color:#7B8098;font-size:12px;line-height:1.7;margin:0}
+.v-sinred{margin:14px 22px 0;padding:11px 14px;border-radius:12px;background:rgba(245,177,76,.12);border:1px solid rgba(245,177,76,.35);color:#F5B14C;font:600 13px/1.5 'Manrope',sans-serif}
+.v-aviso{padding:60px 26px;text-align:center}
+.v-aviso h1{font:600 22px 'Sora',sans-serif;color:#fff;margin:0 0 12px}
+.v-aviso p{color:#9CA0B4;font-size:14px;line-height:1.7;margin:0}
+</style></head>
+<body><div id="app"><p style="padding:40px 22px;color:#9CA0B4;font:500 15px 'Manrope',sans-serif">Abriendo tu cuenta…</p></div>
+<script>
+
+const params = new URLSearchParams(location.search);
+const LOCAL = location.hostname === 'localhost';
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function hoyReal() { const d = new Date(); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
+function HOY() { const h = LOCAL ? params.get('hoy') : null; return h && esFecha(h) ? h : hoyReal(); }
+let S;
+
+/* ===========================================================================
+   Mi Casa — lógica pura (sin pantalla).
+   Se prueba con node (pruebas/logica.test.mjs) y se incrusta en ENTREGA/Mi_Casa.html.
+   Todas las fechas son texto 'AAAA-MM-DD'. Nada aquí toca el DOM.
+   =========================================================================== */
+
+const MS_DIA = 86400000;
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const MES3 = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const DIAS_SEM = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+/* ---------- fechas ---------- */
+function p2(n) { return String(n).padStart(2, '0'); }
+function aMs(s) { const a = s.split('-'); return Date.UTC(+a[0], +a[1] - 1, +a[2]); }
+function deMs(ms) { const d = new Date(ms); return d.getUTCFullYear() + '-' + p2(d.getUTCMonth() + 1) + '-' + p2(d.getUTCDate()); }
+function dif(a, b) { return Math.round((aMs(a) - aMs(b)) / MS_DIA); }          // a - b en días
+function sumarDias(s, n) { return deMs(aMs(s) + n * MS_DIA); }
+function diasDelMes(y, m) { return new Date(Date.UTC(y, m, 0)).getUTCDate(); }  // m = 1..12
+function sumarMeses(s, n) {
+  const a = s.split('-'); const y = +a[0], m = +a[1], d = +a[2];
+  const t = y * 12 + (m - 1) + n; const ny = Math.floor(t / 12), nm = (t % 12) + 1;
+  return ny + '-' + p2(nm) + '-' + p2(Math.min(d, diasDelMes(ny, nm)));
+}
+function mx(a, b) { return a > b ? a : b; }
+function mn(a, b) { return a < b ? a : b; }
+function diaSemana(s) { return new Date(aMs(s)).getUTCDay(); }
+function lunesDe(s) { return sumarDias(s, -((diaSemana(s) + 6) % 7)); }
+function indiceSemana(lunes) { return Math.floor(dif(lunes, '2024-01-01') / 7); }  // 2024-01-01 fue lunes
+function esFecha(s) { return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(aMs(s)); }
+
+/* ---------- formato ---------- */
+function fCorta(s) { const a = s.split('-'); return +a[2] + ' ' + MES3[+a[1] - 1] + ' ' + a[0]; }
+function fSinAnio(s) { const a = s.split('-'); return +a[2] + ' ' + MES3[+a[1] - 1]; }
+function fLarga(s) { const a = s.split('-'); return DIAS_SEM[diaSemana(s)] + ' ' + +a[2] + ' de ' + MESES[+a[1] - 1] + ' de ' + a[0]; }
+function fMes(s) { const a = s.split('-'); return MESES[+a[1] - 1] + ' ' + a[0]; }
+function fmtNum(n) { return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function pesos(n) { return (n < 0 ? '-' : '') + '$' + fmtNum(Math.abs(n)); }
+function plural(n, uno, varios) { return n + ' ' + (n === 1 ? uno : varios); }
+function enDias(n) {
+  if (n === 0) return 'hoy';
+  if (n === 1) return 'mañana';
+  if (n === -1) return 'ayer';
+  return n > 0 ? 'en ' + n + ' días' : 'hace ' + (-n) + ' días';
+}
+function textoDuracion(anios, meses, dias) {
+  const p = [];
+  if (anios) p.push(plural(anios, 'año', 'años'));
+  if (meses) p.push(plural(meses, 'mes', 'meses'));
+  if (dias) p.push(plural(dias, 'día', 'días'));
+  if (!p.length) return '0 días';
+  if (p.length === 1) return p[0];
+  return p.slice(0, -1).join(', ') + ' y ' + p[p.length - 1];
+}
+function textoMeses(m) {
+  const a = Math.floor(m / 12), r = m % 12;
+  return textoDuracion(a, r, 0);
+}
+function apocope(s) { return s.replace(/veintiuno$/, 'veintiún').replace(/uno$/, 'un'); }
+function numeroALetras(n) {
+  n = Math.floor(Math.abs(n));
+  if (n === 0) return 'cero pesos';
+  const U = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
+  const D = ['', '', '', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+  const C = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+  const c3 = x => {
+    if (x === 100) return 'cien';
+    const c = Math.floor(x / 100), r = x % 100; let s = C[c];
+    if (r) { if (s) s += ' '; s += r < 30 ? U[r] : D[Math.floor(r / 10)] + (r % 10 ? ' y ' + U[r % 10] : ''); }
+    return s;
+  };
+  const miles = x => {
+    const m = Math.floor(x / 1000), r = x % 1000; let s = '';
+    if (m) s = m === 1 ? 'mil' : apocope(c3(m)) + ' mil';
+    if (r) s += (s ? ' ' : '') + c3(r);
+    return s;
+  };
+  const mill = Math.floor(n / 1e6), resto = n % 1e6; let s = '';
+  if (mill) s = mill === 1 ? 'un millón' : apocope(miles(mill)) + ' millones';
+  if (resto) s += (s ? ' ' : '') + miles(resto); else if (mill) s += ' de';
+  return apocope(s) + (n === 1 ? ' peso' : ' pesos');
+}
+function mayuscula1(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* ---------- estado base ---------- */
+const CLAVES_LISTA = ['personas', 'cargos', 'pagos', 'facturas', 'reglas', 'compromisos', 'zonas', 'eventos', 'cosas', 'prestamos', 'novedades', 'gastos', 'papelera', 'log'];
+function estadoVacio() {
+  return {
+    v: 2,
+    cfg: Object.assign({ casa: 'Casa Peñuela', dueno: '', duenoCompleto: '', documento: '', direccion: '', ciudad: 'Bucaramanga', telefonos: '', correo: '', logo: '', firma: '', tema: 'oscuro', serviciosIncluidos: true, qrs: [], semillaPersonas: '', semillasAplicadas: [], perfilEditado: false, informeCorreo: '', informeWhatsApp: '', envio: { servicio: '', url: '', clave: '' }, redondeo: 100, gracia: 0, datosPago: '', ultimoRespaldo: null, aseoDia: 0, aseoDueno: true, aseoInicio: null, proximaReunion: null },
+      typeof PERFIL_DUENO !== 'undefined' ? PERFIL_DUENO : {}, typeof FIRMA_INICIAL !== 'undefined' ? { firma: FIRMA_INICIAL } : {}),
+    personas: [], cargos: [], pagos: [], facturas: [],
+    reglas: [], compromisos: [], acuerdoVersion: 1,
+    zonas: [], aseo: {}, eventos: [], cosas: [], prestamos: [], novedades: [], gastos: [], papelera: [],
+    log: [], seq: { recibo: 0 }, sembrado: false
+  };
+}
+function normalizar(s) {
+  const base = estadoVacio();
+  const o = Object.assign(base, s || {});
+  o.cfg = Object.assign(estadoVacio().cfg, (s && s.cfg) || {});
+  // Mientras David no guarde sus Ajustes, los datos de datos_casa.js rellenan lo que esté vacío (por si abrió una versión vieja antes).
+  if (typeof PERFIL_DUENO !== 'undefined' && !o.cfg.perfilEditado) {
+    ['casa', 'dueno', 'duenoCompleto', 'documento', 'direccion', 'ciudad'].forEach(k => { if (!o.cfg[k] && PERFIL_DUENO[k]) o.cfg[k] = PERFIL_DUENO[k]; });
+    if (o.cfg.ciudad === 'Bucaramanga' && PERFIL_DUENO.ciudad) o.cfg.ciudad = PERFIL_DUENO.ciudad;   // 'Bucaramanga' era el valor por defecto de la versión vieja
+    if (!o.cfg.firma && typeof FIRMA_INICIAL !== 'undefined') o.cfg.firma = FIRMA_INICIAL;
+  }
+  o.seq = Object.assign({ recibo: 0 }, (s && s.seq) || {});
+  o.cfg.envio = Object.assign({ servicio: '', url: '', clave: '' }, o.cfg.envio || {});
+  if (!Array.isArray(o.cfg.semillasAplicadas)) o.cfg.semillasAplicadas = [];
+  CLAVES_LISTA.forEach(k => { if (!Array.isArray(o[k])) o[k] = []; });
+  if (!o.aseo || typeof o.aseo !== 'object' || Array.isArray(o.aseo)) o.aseo = {};
+  o.personas.forEach(p => {
+    p.deposito = Object.assign({ acordado: 0, recibido: 0, devuelto: 0 }, p.deposito || {});
+    if (!Array.isArray(p.lista)) p.lista = [];
+    if (!Array.isArray(p.precios)) p.precios = [];
+    if (p.acuerdo === undefined) p.acuerdo = null;
+  });
+  return o;
+}
+
+/* ---------- tiempo en la casa ---------- */
+function tiempoVivido(p, hoy) {
+  if (hoy < p.ingreso) return { estado: 'porLlegar', faltan: dif(p.ingreso, hoy), dias: 0 };
+  const salio = !!(p.salida && p.salida <= hoy);
+  const fin = salio ? p.salida : hoy;
+  const dias = dif(fin, p.ingreso);
+  let meses = 0;
+  while (sumarMeses(p.ingreso, meses + 1) <= fin) meses++;
+  const resto = dif(fin, sumarMeses(p.ingreso, meses));
+  return { estado: salio ? 'salio' : 'activo', dias, mesesTotal: meses, anios: Math.floor(meses / 12), meses: meses % 12, resto, fin, desde: p.ingreso, texto: textoDuracion(Math.floor(meses / 12), meses % 12, resto) };
+}
+/* Dónde va la persona dentro de su periodo de cobro actual: "día 9 de 31, faltan 23 para que cierre". */
+function cicloActual(p, hoy) {
+  const t = tiempoVivido(p, hoy); if (t.estado !== 'activo') return null;
+  const pe = periodosDe(p, hoy).filter(x => x.ini <= hoy && hoy < x.fin).pop(); if (!pe) return null;
+  const total = dif(pe.fin, pe.ini), dia = dif(hoy, pe.ini) + 1;
+  return { ini: pe.ini, fin: pe.fin, dia, total, faltan: dif(pe.fin, hoy), pct: Math.min(100, Math.round(dia / total * 100)), calendario: p.ciclo === 'calendario' };
+}
+function proximoHito(p, t) {
+  if (t.estado !== 'activo') return null;
+  const m = t.mesesTotal + 1;
+  const fecha = sumarMeses(p.ingreso, m);
+  if (p.salida && fecha > p.salida) return null;
+  return { meses: m, fecha, texto: textoMeses(m) };
+}
+
+/* ---------- cobro por reglas ---------- */
+function precioEn(p, fecha) {
+  const ps = (p.precios || []).slice().sort((a, b) => a.desde < b.desde ? -1 : a.desde > b.desde ? 1 : 0);
+  let v = ps.length ? ps[0].monto : 0;
+  for (const x of ps) if (x.desde <= fecha) v = x.monto;
+  return v;
+}
+function redondear(x, u) { u = u || 1; return Math.round(x / u) * u; }
+
+function periodosDe(p, limite) {
+  const out = []; const sal = p.salida || '9999-12-31';
+  if (p.ciclo === 'calendario') {
+    let y = +p.ingreso.slice(0, 4), m = +p.ingreso.slice(5, 7);
+    for (let i = 0; i < 720; i++) {
+      const nIni = y + '-' + p2(m) + '-01'; const nFin = sumarMeses(nIni, 1);
+      const ini = mx(nIni, p.ingreso), fin = mn(nFin, sal);
+      if (ini > limite || ini >= sal) break;
+      out.push({ nIni, nFin, ini, fin, primero: i === 0, y, m });
+      m++; if (m > 12) { m = 1; y++; }
+    }
+  } else {
+    for (let k = 0; k < 720; k++) {
+      const ini = sumarMeses(p.ingreso, k);
+      if (ini > limite || ini >= sal) break;
+      const nFin = sumarMeses(p.ingreso, k + 1);
+      out.push({ nIni: ini, nFin, ini, fin: mn(nFin, sal), primero: k === 0 });
+    }
+  }
+  return out;
+}
+
+function cargosRenta(p, cfg, limite) {
+  const u = cfg.redondeo || 1; const out = [];
+  for (const pe of periodosDe(p, limite)) {
+    const dias = dif(pe.fin, pe.ini); if (dias <= 0) continue;
+    const natural = dif(pe.nFin, pe.nIni);
+    const precio = precioEn(p, pe.ini);
+    let monto, parcial = false;
+    if (p.unidad === 'dia') monto = precio * dias;
+    else {
+      let completo = dias === natural;
+      if (!completo && p.ciclo === 'calendario' && p.primerMes === 'completo' && pe.primero && pe.fin === pe.nFin) completo = true;
+      if (completo) monto = precio; else { monto = redondear(precio * dias / natural, u); parcial = true; }
+    }
+    if (monto <= 0) continue;
+    let due;
+    if (p.ciclo === 'calendario') {
+      const dp = Math.max(1, Math.min(31, +p.diaPago || 1));
+      const dpf = (y, m) => y + '-' + p2(m) + '-' + p2(Math.min(dp, diasDelMes(y, m)));
+      if (p.momento === 'vencido') {
+        due = dpf(+pe.nFin.slice(0, 4), +pe.nFin.slice(5, 7));
+        if (p.salida) due = mn(due, p.salida);
+        due = mx(due, pe.ini);
+      } else due = mx(dpf(pe.y, pe.m), pe.ini);
+    } else due = p.momento === 'vencido' ? pe.fin : pe.ini;
+    if (p.cuentaDesde && due < p.cuentaDesde) continue;   // lo anterior se dio por pagado
+    let concepto;
+    const hasta = sumarDias(pe.fin, -1);
+    if (p.unidad === 'dia') concepto = 'Hospedaje: ' + plural(dias, 'día', 'días') + ' (' + fSinAnio(pe.ini) + ' al ' + fSinAnio(hasta) + ')';
+    else if (p.ciclo === 'calendario') concepto = 'Arriendo de ' + MESES[+pe.nIni.slice(5, 7) - 1] + ' ' + pe.nIni.slice(0, 4) + (parcial ? ' (' + dias + ' de ' + natural + ' días)' : '');
+    else concepto = 'Arriendo del ' + fSinAnio(pe.ini) + ' al ' + fSinAnio(hasta) + (parcial ? ' (' + dias + ' de ' + natural + ' días)' : '');
+    out.push({ id: 'r:' + p.id + ':' + pe.ini, personaId: p.id, fecha: due, concepto, monto, tipo: 'arriendo', origen: 'regla', parcial, periodo: { ini: pe.ini, fin: pe.fin } });
+  }
+  return out;
+}
+
+/* ---------- servicios (luz, agua, internet...) repartidos por días vividos ---------- */
+function repartoFactura(S, f) {
+  const u = S.cfg.redondeo || 1;
+  const hastaEx = sumarDias(f.hasta, 1);
+  const totalDias = Math.max(1, dif(hastaEx, f.desde));
+  const partes = [];
+  for (const id of f.personas || []) {
+    const p = S.personas.find(x => x.id === id); if (!p) continue;
+    const a = mx(f.desde, p.ingreso), b = mn(hastaEx, p.salida || '9999-12-31');
+    const dias = Math.max(0, dif(b, a));
+    partes.push({ personaId: id, nombre: p.nombre, dias, peso: f.reparto === 'iguales' ? (dias > 0 ? 1 : 0) : dias, monto: 0 });
+  }
+  let dueno = null;
+  if (f.incluirDueno) dueno = { dias: totalDias, peso: f.reparto === 'iguales' ? 1 : totalDias, monto: 0 };
+  const suma = partes.reduce((s, x) => s + x.peso, 0) + (dueno ? dueno.peso : 0);
+  if (suma > 0) {
+    let asignado = 0;
+    for (const x of partes) { x.monto = redondear(f.total * x.peso / suma, u); asignado += x.monto; }
+    if (dueno) { dueno.monto = redondear(f.total * dueno.peso / suma, u); asignado += dueno.monto; }
+    const resto = f.total - asignado;
+    if (resto !== 0) {
+      const obj = dueno || partes.reduce((m, x) => (!m || x.monto > m.monto) ? x : m, null);
+      if (obj) obj.monto += resto;
+    }
+  }
+  return { partes, dueno, totalDias, repartido: partes.reduce((s, x) => s + x.monto, 0) };
+}
+
+function cmpFecha(a, b) { return a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); }
+
+function cargosPersona(S, p, limite) {
+  const arr = cargosRenta(p, S.cfg, limite);
+  for (const c of S.cargos) if (c.personaId === p.id) arr.push(Object.assign({}, c, { tipo: 'otro', origen: 'manual' }));
+  for (const f of S.facturas) {
+    if (!(f.personas || []).includes(p.id)) continue;
+    const r = repartoFactura(S, f); const x = r.partes.find(y => y.personaId === p.id);
+    if (x && x.monto > 0) arr.push({ id: 'f:' + f.id + ':' + p.id, personaId: p.id, fecha: f.cobrarEl, concepto: f.concepto + ' (' + x.dias + ' de ' + r.totalDias + ' días · ' + fSinAnio(f.desde) + ' al ' + fSinAnio(f.hasta) + ')', monto: x.monto, tipo: 'servicio', origen: 'factura', facturaId: f.id });
+  }
+  return arr.sort(cmpFecha);
+}
+
+/* ---------- estado de cuenta: los pagos cubren primero lo más viejo ---------- */
+function estadoCuenta(S, p, hoy, limite) {
+  limite = limite || sumarDias(hoy, 45);
+  const cargos = cargosPersona(S, p, limite);
+  const creditos = S.pagos.filter(x => x.personaId === p.id).slice().sort(cmpFecha);
+  const credHoy = creditos.filter(x => x.fecha <= hoy);
+  const totalCreditos = credHoy.reduce((s, x) => s + x.monto, 0);
+  let resto = totalCreditos;
+  const gracia = S.cfg.gracia || 0;
+  for (const c of cargos) {
+    c.pagado = Math.min(resto, c.monto); resto -= c.pagado; c.pendiente = c.monto - c.pagado;
+    if (c.pendiente <= 0) c.estado = 'pagado';
+    else if (c.fecha > hoy) c.estado = c.pagado > 0 ? 'parcial' : 'proximo';
+    else if (hoy > sumarDias(c.fecha, gracia)) c.estado = 'vencido';
+    else c.estado = 'porPagar';
+  }
+  const cargosHoy = cargos.filter(c => c.fecha <= hoy);
+  const deuda = cargosHoy.reduce((s, c) => s + c.pendiente, 0);
+  const vencido = cargos.filter(c => c.estado === 'vencido').reduce((s, c) => s + c.pendiente, 0);
+  const proximo = cargos.find(c => c.fecha > hoy && c.pendiente > 0) || null;
+  const ev = [];
+  cargosHoy.forEach(c => ev.push({ k: 'cargo', fecha: c.fecha, c }));
+  credHoy.forEach(x => ev.push({ k: 'pago', fecha: x.fecha, x }));
+  ev.sort((a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : (a.k === b.k ? 0 : a.k === 'cargo' ? -1 : 1));
+  let saldo = 0;
+  for (const e of ev) { saldo += e.k === 'cargo' ? e.c.monto : -e.x.monto; e.saldo = saldo; }
+  const totalCargado = cargosHoy.reduce((s, c) => s + c.monto, 0);
+  return { cargos, cargosHoy, proximos: cargos.filter(c => c.fecha > hoy), deuda, vencido, proximo, aFavor: resto, libro: ev, totalCargado, totalPagado: credHoy.filter(x => x.tipo !== 'descuento').reduce((s, x) => s + x.monto, 0), totalDescuentos: credHoy.filter(x => x.tipo === 'descuento').reduce((s, x) => s + x.monto, 0) };
+}
+
+/* Cómo se llama un movimiento a favor de la persona: pago recibido, descuento, o abono por compensación (p. ej. un trabajo que ella le hizo al dueño). */
+function etiquetaCredito(x) { return x.tipo === 'descuento' ? (x.metodo === 'Compensación' ? 'Abono por compensación' : 'Descuento') : 'Pago'; }
+function detalleCredito(x) { return etiquetaCredito(x) + (x.metodo && x.metodo !== 'Compensación' ? ' · ' + x.metodo : ''); }
+function custodia(p) { return (p.deposito.recibido || 0) - (p.deposito.devuelto || 0); }
+
+function resumenPersona(S, p, hoy) {
+  const t = tiempoVivido(p, hoy), c = estadoCuenta(S, p, hoy);
+  let nivel, etiqueta;
+  if (t.estado === 'porLlegar') { nivel = 'azul'; etiqueta = 'Llega ' + enDias(t.faltan); }
+  else if (t.estado === 'salio') {
+    if (c.deuda > 0) { nivel = 'rojo'; etiqueta = 'Se fue y debe ' + pesos(c.deuda); }
+    else if (custodia(p) > 0 || (p.lista || []).some(x => x.tipo === 'salida' && !x.hecho)) { nivel = 'ambar'; etiqueta = 'Se fue · pendientes'; }
+    else { nivel = 'gris'; etiqueta = 'Se fue · cerrado'; }
+  }
+  else if (c.vencido > 0) { nivel = 'rojo'; etiqueta = 'Vencido ' + pesos(c.vencido); }
+  else if (c.deuda > 0) { nivel = 'ambar'; etiqueta = 'Por pagar ' + pesos(c.deuda); }
+  else { nivel = 'verde'; etiqueta = 'Al día'; }
+  return { p, t, c, nivel, etiqueta };
+}
+
+/* ---------- aseo: rotación semanal ---------- */
+function participantesAseo(S, lunes) {
+  const fin = sumarDias(lunes, 7);
+  const lista = S.personas.filter(p => p.ingreso < fin && (!p.salida || p.salida > lunes))
+    .sort((a, b) => a.ingreso < b.ingreso ? -1 : a.ingreso > b.ingreso ? 1 : (a.id < b.id ? -1 : 1))
+    .map(p => ({ id: p.id, nombre: p.nombre }));
+  if (S.cfg.aseoDueno) lista.unshift({ id: 'dueno', nombre: S.cfg.dueno || 'Yo' });
+  return lista;
+}
+function limiteAseo(S, lunes) { return sumarDias(lunes, ((S.cfg.aseoDia || 0) + 6) % 7); }
+function aseoSemana(S, lunes, hoy) {
+  const parts = participantesAseo(S, lunes); const idx = indiceSemana(lunes); const lim = limiteAseo(S, lunes);
+  return S.zonas.map((z, i) => {
+    const part = parts.length ? parts[((idx + i) % parts.length + parts.length) % parts.length] : null;
+    const clave = lunes + ':' + z.id; const hecho = S.aseo[clave] || null;
+    let estado = hecho ? 'hecho' : (hoy > lim ? 'atrasado' : 'pendiente');
+    return { zona: z, part, clave, hecho, estado, limite: lim };
+  });
+}
+function semanaCompleta(S, lunes) {
+  if (!S.zonas.length) return false;
+  return S.zonas.every(z => S.aseo[lunes + ':' + z.id]);
+}
+function rachaAseo(S, hoy) {
+  if (!S.zonas.length || !S.cfg.aseoInicio) return 0;
+  const inicio = lunesDe(S.cfg.aseoInicio); const actual = lunesDe(hoy);
+  let racha = semanaCompleta(S, actual) ? 1 : 0;
+  for (let l = sumarDias(actual, -7); l >= inicio; l = sumarDias(l, -7)) { if (semanaCompleta(S, l)) racha++; else break; }
+  return racha;
+}
+function aseoHechosPorPersona(S, hoy, semanas) {
+  const desde = sumarDias(lunesDe(hoy), -7 * ((semanas || 8) - 1)); const out = {};
+  for (const k of Object.keys(S.aseo)) { const lun = k.slice(0, 10); if (lun >= desde) { const por = S.aseo[k].por; out[por] = (out[por] || 0) + 1; } }
+  return out;
+}
+
+/* ---------- fiestas / eventos ---------- */
+function resumenEvento(e, hoy) {
+  const f = fase => (e.tareas || []).filter(t => t.fase === fase);
+  const falta = fase => f(fase).filter(t => !t.hecho).length;
+  return { dias: dif(e.fecha, hoy), antes: f('antes'), durante: f('durante'), despues: f('despues'), faltaAntes: falta('antes'), faltaDespues: falta('despues'), total: (e.tareas || []).length, hechas: (e.tareas || []).filter(t => t.hecho).length };
+}
+
+/* ---------- pendientes: lo que no se puede quedar en el aire ---------- */
+const ORDEN_NIVEL = { rojo: 0, ambar: 1, azul: 2, gris: 3 };
+function pendientes(S, hoy) {
+  const out = [];
+  const add = (nivel, texto, ir, orden) => out.push({ nivel, texto, ir: ir || '', orden: orden || 0 });
+  for (const p of S.personas) {
+    const r = resumenPersona(S, p, hoy), t = r.t, c = r.c, nom = p.nombre, ir = '#/persona/' + p.id;
+    if (t.estado !== 'porLlegar') {
+      if (c.vencido > 0) {
+        const venc = c.cargos.filter(x => x.estado === 'vencido'); const desde = venc[0].fecha;
+        add('rojo', nom + ' debe ' + pesos(c.vencido) + ' (vencido desde el ' + fCorta(desde) + ', ' + enDias(dif(desde, hoy)) + ')', ir, dif(desde, hoy));
+      } else if (c.deuda > 0) {
+        const pend = c.cargosHoy.filter(x => x.pendiente > 0);
+        add('ambar', nom + ': le toca pagar ' + pesos(c.deuda) + ' (' + (pend[0].fecha === hoy ? 'vence hoy' : 'venció el ' + fCorta(pend[0].fecha)) + ')', ir, 0);
+      } else if (t.estado === 'activo' && c.proximo) {
+        const d = dif(c.proximo.fecha, hoy);
+        if (d <= 7) add('ambar', nom + ': su próximo pago de ' + pesos(c.proximo.pendiente) + ' es ' + enDias(d) + ' (' + fCorta(c.proximo.fecha) + ')', ir, d);
+      }
+    }
+    if (t.estado === 'porLlegar' && t.faltan <= 30) add('azul', nom + ' llega ' + enDias(t.faltan) + ' (' + fCorta(p.ingreso) + ')', ir, t.faltan);
+    if (p.ingresoProvisional && t.estado !== 'salio') add('ambar', 'Falta confirmar el día en que llega ' + nom + ' (por ahora aparece el ' + fCorta(p.ingreso) + ')', ir, 3);
+    if (t.estado !== 'salio' && (p.deposito.acordado || 0) > (p.deposito.recibido || 0) && !(t.estado === 'porLlegar' && t.faltan > 14))
+      add('ambar', 'Falta el depósito de ' + nom + ': ' + pesos(p.deposito.acordado - p.deposito.recibido), ir, 5);
+    if (S.reglas.length && t.estado !== 'salio' && (t.estado === 'activo' || t.faltan <= 14)) {
+      if (!p.acuerdo) add('ambar', nom + ' aún no ha aceptado el acuerdo de la casa', '#/conv/acuerdo', 6);
+      else if (p.acuerdo.version < S.acuerdoVersion) add('ambar', nom + ' debe volver a aceptar el acuerdo (cambió desde la última vez)', '#/conv/acuerdo', 6);
+    }
+    const ent = (p.lista || []).filter(x => x.tipo === 'entrada' && !x.hecho);
+    if (ent.length && (t.estado === 'activo' || (t.estado === 'porLlegar' && t.faltan <= 7))) add('ambar', nom + ': faltan ' + ent.length + ' cosas de su ingreso (' + ent.map(x => x.texto).join(', ') + ')', ir, 7);
+    const sal = (p.lista || []).filter(x => x.tipo === 'salida' && !x.hecho);
+    if (sal.length && p.salida && dif(p.salida, hoy) <= 14) add('ambar', nom + ': faltan ' + sal.length + ' cosas de su salida (' + sal.map(x => x.texto).join(', ') + ')', ir, 7);
+    if (t.estado === 'salio' && custodia(p) > 0) {
+      const neto = custodia(p) - c.deuda;
+      add('ambar', 'Devolver el depósito de ' + nom + ': tiene ' + pesos(custodia(p)) + ' en custodia' + (c.deuda > 0 ? ' (descontando lo que debe, quedan ' + pesos(Math.max(0, neto)) + ')' : ''), ir, 8);
+    }
+  }
+  const porCuarto = {};
+  for (const p of S.personas) {
+    if (tiempoVivido(p, hoy).estado === 'salio') continue;
+    const k = (p.cuarto || '').toLowerCase().replace(/habitaci[oó]n|hab\.?|cuarto|#/g, '').replace(/\s+/g, ''); if (!k) continue;
+    (porCuarto[k] = porCuarto[k] || []).push(p);
+  }
+  for (const k of Object.keys(porCuarto)) if (porCuarto[k].length > 1) add('azul', porCuarto[k].map(x => x.nombre).join(' y ') + ' aparecen en la misma habitación (' + porCuarto[k][0].cuarto + '). Si la comparten, todo bien; si no, revisa el número.', '#/persona/' + porCuarto[k][0].id, 15);
+  for (const pr of S.prestamos) {
+    if (pr.devuelto) continue; const d = dif(hoy, pr.fecha);
+    const p = S.personas.find(x => x.id === pr.personaId); const quien = p ? p.nombre : 'alguien';
+    const salio = p && p.salida && p.salida <= hoy;
+    if (salio) add('rojo', quien + ' se fue y no ha devuelto: ' + pr.cosa, '#/conv/cosas', 0);
+    else if (d >= 14 && pr.tipo !== 'entrega') add('ambar', quien + ' tiene prestado «' + pr.cosa + '» hace ' + d + ' días', '#/conv/cosas', 10);
+  }
+  for (const n of S.novedades) {
+    if (n.estado === 'resuelta') continue;
+    add(n.tipo === 'Faltante' ? 'rojo' : 'ambar', 'Novedad abierta (' + n.tipo.toLowerCase() + '): ' + n.texto, '#/conv/cosas', 1);
+  }
+  if (S.zonas.length && S.cfg.aseoInicio) {
+    const lunes = lunesDe(hoy); const lim = limiteAseo(S, lunes);
+    const filas = aseoSemana(S, lunes, hoy).filter(x => x.estado !== 'hecho');
+    if (filas.length && hoy > lim) add('rojo', 'Aseo atrasado: falta ' + filas.map(x => x.zona.nombre + (x.part ? ' (' + x.part.nombre + ')' : '')).join(', '), '#/conv/aseo', 0);
+    else if (filas.length && dif(lim, hoy) <= 1) add('ambar', 'Aseo de esta semana: falta ' + filas.map(x => x.zona.nombre + (x.part ? ' (' + x.part.nombre + ')' : '')).join(', ') + ' — se cierra ' + enDias(dif(lim, hoy)), '#/conv/aseo', 2);
+  }
+  for (const e of S.eventos) {
+    if (e.cerrado) continue; const r = resumenEvento(e, hoy);
+    if (r.dias >= 0 && r.dias <= 7 && r.faltaAntes > 0) add('ambar', e.nombre + ' es ' + enDias(r.dias) + ': faltan ' + r.faltaAntes + ' cosas por preparar', '#/conv/fiestas', r.dias);
+    if (r.dias < 0 && r.faltaDespues > 0) add('rojo', 'Después de «' + e.nombre + '» falta por hacer: ' + r.faltaDespues + ' tareas', '#/conv/fiestas', r.dias);
+    else if (r.dias <= 0 && r.dias > -3 && r.faltaDespues === 0 && r.total > 0) add('gris', 'Ya se puede cerrar «' + e.nombre + '»: todo quedó hecho', '#/conv/fiestas', 20);
+  }
+  if (S.cfg.proximaReunion) {
+    const d = dif(S.cfg.proximaReunion, hoy);
+    if (d < 0) add('ambar', 'La reunión de casa quedó pendiente (era ' + fCorta(S.cfg.proximaReunion) + '): programa la siguiente', '#/conv/guia', 12);
+    else if (d <= 3) add('azul', 'Reunión de casa ' + enDias(d) + ' (' + fCorta(S.cfg.proximaReunion) + ')', '#/conv/guia', d);
+  }
+  return out.sort((a, b) => ORDEN_NIVEL[a.nivel] - ORDEN_NIVEL[b.nivel] || a.orden - b.orden);
+}
+
+/* ---------- agenda de los próximos días ---------- */
+function agenda(S, hoy, dias) {
+  const fin = sumarDias(hoy, dias); const ev = [];
+  for (const p of S.personas) {
+    const t = tiempoVivido(p, hoy);
+    if (t.estado === 'porLlegar' && p.ingreso <= fin) ev.push({ fecha: p.ingreso, tipo: 'llegada', texto: p.nombre + ' llega a la casa', id: p.id });
+    if (p.salida && p.salida > hoy && p.salida <= fin) ev.push({ fecha: p.salida, tipo: 'salida', texto: p.nombre + ' se va de la casa', id: p.id });
+    if (t.estado !== 'salio') {
+      const c = estadoCuenta(S, p, hoy, fin);
+      for (const x of c.cargos) if (x.fecha > hoy && x.fecha <= fin && x.pendiente > 0) ev.push({ fecha: x.fecha, tipo: 'cobro', texto: p.nombre + ' paga ' + pesos(x.pendiente) + ' (' + x.concepto.split(' (')[0] + ')', id: p.id });
+      const h = proximoHito(p, t);
+      if (h && h.fecha <= fin && (h.meses === 1 || h.meses === 3 || h.meses % 6 === 0)) ev.push({ fecha: h.fecha, tipo: 'hito', texto: p.nombre + ' cumple ' + h.texto + ' en la casa', id: p.id });
+    }
+  }
+  for (const e of S.eventos) if (!e.cerrado && e.fecha >= hoy && e.fecha <= fin) ev.push({ fecha: e.fecha, tipo: 'fiesta', texto: e.nombre, id: e.id });
+  if (S.cfg.proximaReunion && S.cfg.proximaReunion >= hoy && S.cfg.proximaReunion <= fin) ev.push({ fecha: S.cfg.proximaReunion, tipo: 'reunion', texto: 'Reunión de casa', id: '' });
+  if (S.zonas.length && S.cfg.aseoInicio) {
+    const lim = limiteAseo(S, lunesDe(hoy));
+    if (lim >= hoy && lim <= fin) ev.push({ fecha: lim, tipo: 'aseo', texto: 'Cierra el aseo de la semana', id: '' });
+  }
+  return ev.sort((a, b) => a.fecha < b.fecha ? -1 : a.fecha > b.fecha ? 1 : 0);
+}
+
+/* ---------- totales del inicio ---------- */
+function totales(S, hoy) {
+  let porCobrar = 0, vencido = 0, esperadoMes = 0, prox30 = 0;
+  const mesIni = hoy.slice(0, 8) + '01', mesFin = sumarMeses(mesIni, 1);
+  for (const p of S.personas) {
+    const c = estadoCuenta(S, p, hoy, sumarDias(hoy, 45));
+    porCobrar += c.deuda; vencido += c.vencido;
+    for (const x of c.cargos) {
+      if (x.fecha >= mesIni && x.fecha < mesFin) esperadoMes += x.monto;
+      if (x.fecha > hoy && x.fecha <= sumarDias(hoy, 30)) prox30 += x.pendiente;
+    }
+  }
+  const cobradoMes = S.pagos.filter(x => x.tipo !== 'descuento' && x.fecha >= mesIni && x.fecha < mesFin && x.fecha <= hoy).reduce((s, x) => s + x.monto, 0);
+  return { porCobrar, vencido, esperadoMes, cobradoMes, prox30 };
+}
+
+/* ---------- línea de tiempo de la casa ---------- */
+function lineaTiempo(S, hoy) {
+  if (!S.personas.length) return null;
+  let ini = hoy, fin = hoy;
+  for (const p of S.personas) {
+    if (p.ingreso < ini) ini = p.ingreso;
+    if (p.ingreso > fin) fin = p.ingreso;
+    if (p.salida && p.salida > fin) fin = p.salida;
+  }
+  ini = sumarDias(ini, -7); fin = sumarDias(fin, 30);
+  const total = dif(fin, ini); const pct = f => Math.max(0, Math.min(100, dif(f, ini) / total * 100));
+  const filas = S.personas.slice().sort((a, b) => a.ingreso < b.ingreso ? -1 : 1).map(p => {
+    const t = tiempoVivido(p, hoy); const segs = [];
+    if (t.estado === 'porLlegar') segs.push({ tipo: 'futuro', a: pct(p.ingreso), b: pct(p.salida || fin) });
+    else {
+      segs.push({ tipo: t.estado === 'salio' ? 'fue' : 'vivido', a: pct(p.ingreso), b: pct(t.fin) });
+      if (t.estado === 'activo') segs.push({ tipo: 'futuro', a: pct(hoy), b: pct(p.salida || fin) });
+    }
+    return { p, t, segs };
+  });
+  const meses = []; let m = sumarMeses(ini.slice(0, 8) + '01', 1);
+  while (m < fin) { meses.push({ pct: pct(m), texto: MES3[+m.slice(5, 7) - 1] + (m.slice(5, 7) === '01' ? ' ' + m.slice(0, 4) : '') }); m = sumarMeses(m, 1); }
+  return { ini, fin, hoyPct: pct(hoy), filas, meses };
+}
+
+/* ---------- inquilinos duplicados: encontrar, unir y dejar copia en la papelera ---------- */
+function nuevoId() { return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4); }
+function normNombre(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+function normTel(s) { const d = String(s || '').replace(/\D/g, ''); return d.length >= 7 ? d.slice(-10) : ''; }
+function movimientosDe(S, id) {
+  return { pagos: S.pagos.filter(x => x.personaId === id).length, cargos: S.cargos.filter(x => x.personaId === id).length, prestamos: S.prestamos.filter(x => x.personaId === id).length, cosas: S.cosas.filter(x => x.responsableId === id).length };
+}
+function totalMovimientos(m) { return m.pagos + m.cargos + m.prestamos + m.cosas; }
+/* Grupos de personas que parecen la misma. «seguro» = mismo nombre completo, o mismo teléfono y mismo primer nombre. */
+function encontrarDuplicados(S, soloSeguros) {
+  const ps = S.personas; const padre = ps.map((_, i) => i);
+  const bus = i => padre[i] === i ? i : (padre[i] = bus(padre[i]));
+  const une = (a, b) => { padre[bus(a)] = bus(b); };
+  const porNom = {}, porTel = {}; const primero = i => normNombre(ps[i].nombre).split(' ')[0];
+  ps.forEach((p, i) => {
+    const n = normNombre(p.nombre), t = normTel(p.telefono);
+    if (n) { if (n in porNom) une(i, porNom[n]); else porNom[n] = i; }
+    if (t) { (porTel[t] = porTel[t] || []).forEach(j => { if (!soloSeguros || primero(i) === primero(j)) une(i, j); }); porTel[t].push(i); }
+  });
+  const grupos = {}; ps.forEach((p, i) => { (grupos[bus(i)] = grupos[bus(i)] || []).push(p); });
+  return Object.values(grupos).filter(g => g.length > 1).map(g => {
+    const nombres = new Set(g.map(p => normNombre(p.nombre))); const tels = g.map(p => normTel(p.telefono)).filter(Boolean);
+    const mismoNombre = nombres.size === 1; const compartenTel = new Set(tels).size < tels.length;
+    const primeros = new Set(g.map(p => normNombre(p.nombre).split(' ')[0]));
+    const motivos = []; if (mismoNombre) motivos.push('mismo nombre'); if (compartenTel) motivos.push('mismo teléfono');
+    // la que se queda por defecto: la fecha de llegada más antigua (suele ser la verdadera); si empatan, la que tiene más movimientos
+    const orden = g.slice().sort((a, b) => (a.ingreso < b.ingreso ? -1 : a.ingreso > b.ingreso ? 1 : 0) || totalMovimientos(movimientosDe(S, b.id)) - totalMovimientos(movimientosDe(S, a.id)));
+    return { personas: orden, motivos, seguro: !!soloSeguros || mismoNombre || (compartenTel && primeros.size === 1) };
+  });
+}
+function pagosRepetidos(S, personaId) {
+  const vistos = {}; let extra = 0;
+  S.pagos.filter(x => x.personaId === personaId).forEach(x => { const k = x.fecha + '|' + x.monto + '|' + x.tipo; if (vistos[k]) extra++; else vistos[k] = 1; });
+  return extra;
+}
+/* Pasa todo lo de «dup» a «keep» y deja la ficha de «dup» en la papelera. Devuelve cuánto movió, o null si no se pudo. */
+function fusionarPersonas(S, keepId, dupId, motivo, ahora) {
+  const k = S.personas.find(p => p.id === keepId), d = S.personas.find(p => p.id === dupId);
+  if (!k || !d || k === d) return null;
+  const r = { pagos: 0, cargos: 0, prestamos: 0, cosas: 0, novedades: 0, facturas: 0, tareas: 0, aseo: 0, repetidos: 0 };
+  S.pagos.forEach(x => { if (x.personaId === dupId) { x.personaId = keepId; r.pagos++; } });
+  S.cargos.forEach(x => { if (x.personaId === dupId) { x.personaId = keepId; r.cargos++; } });
+  S.prestamos.forEach(x => { if (x.personaId === dupId) { x.personaId = keepId; r.prestamos++; } });
+  S.cosas.forEach(x => { if (x.responsableId === dupId) { x.responsableId = keepId; r.cosas++; } });
+  S.novedades.forEach(x => { if (x.personaId === dupId) { x.personaId = keepId; r.novedades++; } });
+  S.facturas.forEach(f => { if ((f.personas || []).includes(dupId)) { f.personas = Array.from(new Set(f.personas.map(i => i === dupId ? keepId : i))); r.facturas++; } });
+  S.eventos.forEach(e => (e.tareas || []).forEach(t => { if (t.asignado === dupId) { t.asignado = keepId; r.tareas++; } }));
+  Object.keys(S.aseo).forEach(c => { if (S.aseo[c] && S.aseo[c].por === dupId) { S.aseo[c].por = keepId; r.aseo++; } });
+  if (!k.telefono && d.telefono) k.telefono = d.telefono;
+  if (!k.cuarto && d.cuarto) k.cuarto = d.cuarto;
+  ['acordado', 'recibido', 'devuelto'].forEach(c => { k.deposito[c] = Math.max(k.deposito[c] || 0, (d.deposito && d.deposito[c]) || 0); });
+  if (!k.acuerdo && d.acuerdo) k.acuerdo = d.acuerdo;
+  (d.lista || []).forEach(t => { const e = (k.lista = k.lista || []).find(x => x.texto === t.texto && x.tipo === t.tipo); if (e) e.hecho = e.hecho || t.hecho; else k.lista.push(t); });
+  if (d.notas && d.notas !== k.notas) k.notas = (k.notas ? k.notas + '\n' : '') + d.notas;
+  S.papelera.push({ id: nuevoId(), t: ahora || '', motivo: motivo || 'Duplicado', unidoCon: k.nombre, persona: JSON.parse(JSON.stringify(d)) });
+  S.personas = S.personas.filter(p => p !== d);
+  r.repetidos = pagosRepetidos(S, keepId);
+  return r;
+}
+/* Une todos los grupos «seguros» de golpe. Devuelve cuántos se unieron y los nombres. */
+function limpiarDuplicadosSeguros(S, ahora) {
+  const unidos = []; let hubo = true, vueltas = 0;
+  while (hubo && vueltas++ < 20) {
+    hubo = false;
+    for (const g of encontrarDuplicados(S, true)) {
+      const [keep, ...resto] = g.personas;
+      resto.forEach(d => { if (fusionarPersonas(S, keep.id, d.id, 'Duplicado (' + g.motivos.join(', ') + ')', ahora)) unidos.push(d.nombre); });
+      hubo = true; break;
+    }
+  }
+  return unidos;
+}
+function restaurarDePapelera(S, id) {
+  const i = S.papelera.findIndex(x => x.id === id); if (i < 0) return null;
+  const p = S.papelera[i].persona; if (S.personas.some(x => x.id === p.id)) p.id = nuevoId();
+  S.personas.push(p); S.papelera.splice(i, 1); return p;
+}
+
+/* ---------- servicios mes a mes y cruce de cuentas ---------- */
+function mesesEntre(desde, hasta) { const out = []; let m = desde + '-01'; const fin = hasta + '-01'; for (let i = 0; m <= fin && i < 600; i++) { out.push(m.slice(0, 7)); m = sumarMeses(m, 1); } return out; }
+function mesDe(fecha) { return fecha.slice(0, 7); }
+function gastosDelMes(S, mes) { return S.gastos.filter(g => g.mes === mes); }
+function totalGastosMes(S, mes) { return gastosDelMes(S, mes).reduce((s, g) => s + g.valor, 0); }
+/* Cruce: lo que entró (plata + abonos) contra lo que costaron los servicios, mes a mes. */
+function cruceCuentas(S, desde, hasta, hoy) {
+  const meses = mesesEntre(desde, hasta), finEx = sumarMeses(hasta + '-01', 1);
+  const filas = meses.map(m => ({ mes: m, esperado: 0, recibido: 0, abonos: 0, servicios: 0, entro: 0, queda: 0 })); const idx = {}; filas.forEach(f => { idx[f.mes] = f; });
+  let porCobrar = 0;
+  for (const p of S.personas) {
+    const c = estadoCuenta(S, p, hoy, mx(finEx, sumarDias(hoy, 45)));
+    porCobrar += c.deuda;
+    for (const x of c.cargos) { const f = idx[mesDe(x.fecha)]; if (f) f.esperado += x.monto; }
+  }
+  for (const x of S.pagos) { if (x.fecha > hoy) continue; const f = idx[mesDe(x.fecha)]; if (!f) continue; if (x.tipo === 'descuento') f.abonos += x.monto; else f.recibido += x.monto; }
+  for (const g of S.gastos) { const f = idx[g.mes]; if (f) f.servicios += g.valor; }
+  const total = { esperado: 0, recibido: 0, abonos: 0, servicios: 0, entro: 0, queda: 0 };
+  filas.forEach(f => { f.entro = f.recibido + f.abonos; f.queda = f.entro - f.servicios; Object.keys(total).forEach(k => { total[k] += f[k]; }); });
+  return { filas, total, porCobrar, desde, hasta };
+}
+function rangoPorDefecto(S, hoy) {
+  const meses = [mesDe(hoy)]; S.personas.forEach(p => meses.push(mesDe(p.ingreso))); S.gastos.forEach(g => meses.push(g.mes)); S.pagos.forEach(x => meses.push(mesDe(x.fecha)));
+  meses.sort(); return { desde: meses[0], hasta: mesDe(hoy) };
+}
+function informeTexto(S, desde, hasta, hoy) {
+  const c = cruceCuentas(S, desde, hasta, hoy); const t = c.total; const corto = m => MES3[+m.slice(5, 7) - 1] + ' ' + m.slice(0, 4);
+  const l = ['📊 Informe de cuentas — ' + S.cfg.casa, 'Periodo: ' + (desde === hasta ? fMes(desde + '-01') : fMes(desde + '-01') + ' a ' + fMes(hasta + '-01')), 'Fecha del informe: ' + fCorta(hoy), '',
+    'Entró: ' + pesos(t.entro) + (t.abonos ? ' (plata ' + pesos(t.recibido) + ' + abonos ' + pesos(t.abonos) + ')' : ''), 'Servicios pagados: ' + pesos(t.servicios), 'Te quedó: ' + pesos(t.queda), 'Por cobrar hoy: ' + pesos(c.porCobrar), '', 'Mes a mes:'];
+  c.filas.forEach(f => l.push('• ' + corto(f.mes) + ': entró ' + pesos(f.entro) + ' · servicios ' + pesos(f.servicios) + ' · quedó ' + pesos(f.queda)));
+  l.push('', 'Saldos de los inquilinos:');
+  S.personas.forEach(p => { const e = estadoCuenta(S, p, hoy); l.push('• ' + p.nombre + ': ' + (e.deuda > 0 ? 'debe ' + pesos(e.deuda) : (e.aFavor > 0 ? 'a favor ' + pesos(e.aFavor) : 'al día'))); });
+  const conGastos = Array.from(new Set(S.gastos.map(g => g.mes))).filter(m => m >= desde && m <= hasta).sort(); const ult = conGastos[conGastos.length - 1];
+  if (ult) { l.push('', 'Servicios de ' + fMes(ult + '-01') + ':'); gastosDelMes(S, ult).forEach(g => l.push('• ' + g.concepto + ': ' + pesos(g.valor) + (g.pagadoEl ? ' (pagado el ' + fSinAnio(g.pagadoEl) + ')' : ' (sin pagar)'))); }
+  return l.join('\n');
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { normNombre, normTel, movimientosDe, encontrarDuplicados, pagosRepetidos, fusionarPersonas, limpiarDuplicadosSeguros, restaurarDePapelera, mesesEntre, gastosDelMes, totalGastosMes, cruceCuentas, rangoPorDefecto, informeTexto, dif, sumarDias, sumarMeses, diasDelMes, lunesDe, indiceSemana, esFecha, fCorta, fSinAnio, fLarga, fMes, pesos, fmtNum, enDias, plural, textoDuracion, textoMeses, numeroALetras, estadoVacio, normalizar, tiempoVivido, cicloActual, proximoHito, precioEn, redondear, periodosDe, cargosRenta, repartoFactura, cargosPersona, estadoCuenta, resumenPersona, etiquetaCredito, detalleCredito, custodia, participantesAseo, aseoSemana, semanaCompleta, rachaAseo, aseoHechosPorPersona, limiteAseo, resumenEvento, pendientes, agenda, totales, lineaTiempo };
+}
+
+/* ===========================================================================
+   Casa Peñuela — documentos (recibo, estado de cuenta, acuerdo) con la plantilla de Electromandos:
+   mismos bloques que plantilla_em.py (barra superior, encabezado con logo, partes, franja, tabla, tarjeta de total, firmas, pie).
+   =========================================================================== */
+/* Logo: la Ñ de Peñuela con el techo de una casa como tilde. Sin letras dentro (no depende de ninguna fuente). */
+const LOGO_SVG = '<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Casa Peñuela"><defs>'
+  + '<linearGradient id="cpFondo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3B44A8"/><stop offset="1" stop-color="#4A3A85"/></linearGradient>'
+  + '<linearGradient id="cpBrillo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFFFFF" stop-opacity=".16"/><stop offset=".55" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient></defs>'
+  + '<rect width="120" height="120" rx="30" fill="url(#cpFondo)"/><rect width="120" height="120" rx="30" fill="url(#cpBrillo)"/>'
+  + '<rect x=".75" y=".75" width="118.5" height="118.5" rx="29.25" fill="none" stroke="#C7CBFF" stroke-opacity=".28" stroke-width="1.5"/>'
+  + '<path d="M34 42 L60 22 L86 42" fill="none" stroke="#F5B14C" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>'
+  + '<path d="M40 98 V58 L80 98 V58" fill="none" stroke="#F4F5FB" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function logoHTML() { return S.cfg.logo ? '<img src="' + String(S.cfg.logo).replace(/["<>\s]/g, '') + '" alt="Logo">' : LOGO_SVG; }
+function firmaHTML() { return S.cfg.firma ? '<img src="' + String(S.cfg.firma).replace(/["<>\s]/g, '') + '" alt="Firma">' : ''; }
+
+function arrendador() {
+  const c = S.cfg;
+  return { nombre: c.duenoCompleto || c.dueno || c.casa, lineas: [c.documento ? 'C.C. / NIT ' + c.documento : '', [c.direccion, c.ciudad].filter(Boolean).join(' — '), c.telefonos, c.correo].filter(Boolean) };
+}
+const dEsc = esc;
+const dLineas = l => l.map(x => dEsc(x)).join('<br>');
+function dTop(izq, der) { return '<div class="d-top"><div>' + dEsc(izq) + '</div><div>' + dEsc(der) + '</div></div>'; }
+function dHero(kicker, titulo, codigo, sub) {
+  return '<div class="d-hero"><div class="d-hero-in"><div class="d-logo">' + logoHTML() + '</div><div style="flex-grow:1"><div class="d-kicker">' + dEsc(kicker) + '</div><h1>' + dEsc(titulo) + '</h1></div>'
+    + '<div style="flex-shrink:0;text-align:right"><div class="d-cod">' + dEsc(codigo) + '</div><div class="d-cod-sub">' + sub.map(dEsc).join('<br>') + '</div></div></div></div>';
+}
+function dPartes(t1, n1, l1, t2, n2, l2) {
+  const p = (t, n, l) => '<div class="d-parte"><div class="d-lbl">' + dEsc(t) + '</div><div class="d-nombre">' + dEsc(n) + '</div><div class="d-dato">' + dLineas(l) + '</div></div>';
+  return '<div class="d-pad"><div class="d-partes">' + p(t1, n1, l1) + p(t2, n2, l2) + '</div></div>';
+}
+function dFranja(celdas) { return '<div style="padding:14px 52px 0"><div class="d-franja" style="grid-template-columns:repeat(' + celdas.length + ',minmax(0,1fr))">' + celdas.map(c => '<div class="d-celda"><div class="d-lbl">' + dEsc(c[0]) + '</div><div class="d-val">' + dEsc(c[1]) + '</div></div>').join('') + '</div></div>'; }
+function dSeccion(t) { return '<h2>' + dEsc(t) + '</h2><div class="d-barra"></div>'; }
+function dPad(html, top) { return '<div class="d-pad"' + (top != null ? ' style="padding-top:' + top + 'px"' : '') + '>' + html + '</div>'; }
+function dTotal(etq, grande, resumen, pares) {
+  return '<div class="d-total"><div class="d-l2">' + dEsc(etq) + '</div><div class="d-big">' + dEsc(grande) + '</div>' + (resumen ? '<div class="d-res">' + dEsc(resumen) + '</div>' : '')
+    + (pares && pares.length ? '<div class="d-pares">' + pares.map(x => '<div><div class="d-v">' + dEsc(x[1]) + '</div><div class="d-k">' + dEsc(x[0]) + '</div></div>').join('') + '</div>' : '') + '</div>';
+}
+function dFirmas(lista) {
+  return '<div class="d-firmas">' + lista.map(f => '<div>' + (f.img || '') + '<div class="d-linea"></div><div class="d-fn">' + dEsc(f.nombre) + '</div><div class="d-fs">' + dEsc(f.sub || '') + '</div></div>').join('') + '</div>';
+}
+function dPie(izq, der) { return '<div class="d-pie"><div>' + dEsc(izq) + '</div><div>' + dEsc(der) + '</div></div>'; }
+function dCiudadFecha(f) { return [(S.cfg.ciudad || '').toUpperCase(), fCorta(f).toUpperCase()].filter(Boolean); }
+function mensualTxt(p, hoy) { return pesos(precioEn(p, hoy < p.ingreso ? p.ingreso : hoy)) + (p.unidad === 'dia' ? ' por día' : ' por mes'); }
+
+/* ---------- recibo de pago ---------- */
+function reciboHTML(x) {
+  const p = persona(x.personaId) || { nombre: '—', cuarto: '', telefono: '' }; const real = persona(x.personaId); const a = arrendador();
+  const c = real ? estadoCuenta(S, real, mx(HOY(), x.fecha)) : null; const cod = 'R-' + String(x.numero || 0).padStart(4, '0');
+  return dTop('Recibo de pago ' + cod, S.cfg.documento ? 'C.C. / NIT ' + S.cfg.documento : S.cfg.casa)
+    + dHero(S.cfg.casa + ' · arriendo y servicios', 'Recibo de pago', cod, dCiudadFecha(x.fecha))
+    + dPartes('Recibido de', p.nombre, [p.cuarto, p.telefono].filter(Boolean), 'Recibe', a.nombre, a.lineas.length ? a.lineas : [S.cfg.casa])
+    + dFranja([['Fecha del pago', fCorta(x.fecha)], ['Forma de pago', x.metodo || 'No indicada'], ['Concepto', x.nota || 'Arriendo'], ['Número de recibo', cod]])
+    + dPad(dSeccion('Valor recibido'), 38)
+    + '<div class="d-pad" style="padding-top:0">' + dTotal('Valor total recibido', pesos(x.monto), mayuscula1(numeroALetras(x.monto)) + '.',
+      c ? [['Saldo después de este pago', c.deuda > 0 ? pesos(c.deuda) : (c.aFavor > 0 ? 'A favor ' + pesos(c.aFavor) : 'Al día')], ['Próximo pago', c.proximo ? pesos(c.proximo.pendiente) + ' el ' + fCorta(c.proximo.fecha) : '—']] : []) + '</div>'
+    + dPad(dFirmas([{ img: firmaHTML(), nombre: a.nombre, sub: 'Recibió' }, { nombre: p.nombre, sub: 'Pagó' }]), 44)
+    + dPie(S.cfg.casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), cod + ' · ' + fCorta(x.fecha));
+}
+
+/* ---------- estado de cuenta ---------- */
+function cuentaHTML(p) {
+  const hoy = HOY(), r = resumenPersona(S, p, hoy), c = r.c, t = r.t, a = arrendador(); const cod = 'EC-' + hoy.replace(/-/g, '');
+  const filas = c.libro.map(e => e.k === 'cargo'
+    ? '<div class="d-fila"><div class="d-n">' + dEsc(fCorta(e.c.fecha)) + '</div><div class="d-d">' + dEsc(e.c.concepto) + '</div><div class="d-c">' + dEsc(pesos(e.c.monto)) + '</div><div class="d-p"></div><div class="d-s">' + dEsc(pesos(e.saldo)) + '</div></div>'
+    : '<div class="d-fila"><div class="d-n">' + dEsc(fCorta(e.x.fecha)) + '</div><div class="d-d">' + dEsc(detalleCredito(e.x)) + (e.x.nota ? '<small>' + dEsc(e.x.nota) + '</small>' : '') + (e.x.numero ? '<small>Recibo R-' + String(e.x.numero).padStart(4, '0') + '</small>' : '') + '</div><div class="d-c"></div><div class="d-p">' + dEsc(pesos(e.x.monto)) + '</div><div class="d-s">' + dEsc(pesos(e.saldo)) + '</div></div>').join('');
+  const prox = c.proximos.slice(0, 3).map(x => '<div class="d-fila"><div class="d-n">' + dEsc(fCorta(x.fecha)) + '</div><div class="d-d">' + dEsc(x.concepto) + '</div><div class="d-c">' + dEsc(pesos(x.monto)) + '</div><div class="d-p"></div><div class="d-s"></div></div>').join('');
+  const dias = t.estado === 'porLlegar' ? 'Llega en ' + t.faltan + ' días' : t.dias + (t.dias === 1 ? ' día' : ' días');
+  return dTop('Estado de cuenta ' + cod, S.cfg.documento ? 'C.C. / NIT ' + S.cfg.documento : S.cfg.casa)
+    + dHero(S.cfg.casa + ' · arriendo y servicios', 'Estado de cuenta', cod, dCiudadFecha(hoy))
+    + dPartes('Habitante', p.nombre, [p.cuarto, p.telefono].filter(Boolean), 'Arrendador', a.nombre, a.lineas.length ? a.lineas : [S.cfg.casa])
+    + dFranja([[t.estado === 'porLlegar' ? 'Llega el' : 'En la casa desde', fCorta(p.ingreso)], [t.estado === 'salio' ? 'Días que vivió' : 'Días en la casa', dias], ['Valor del cuarto', mensualTxt(p, hoy)], [t.estado === 'salio' ? 'Se fue el' : 'Próximo pago', t.estado === 'salio' ? fCorta(p.salida) : (c.proximo ? fCorta(c.proximo.fecha) : '—')]])
+    + dPad(dSeccion('1. Movimientos de la cuenta')
+      + '<div class="d-thead"><div>Fecha</div><div>Detalle</div><div class="d-r">Cargo</div><div class="d-r">Pago</div><div class="d-r">Saldo</div></div>' + (filas || '<div class="d-fila"><div></div><div class="d-d">Todavía no hay movimientos.</div></div>')
+      + (prox ? '<div class="d-sec">Próximos cobros</div>' + prox : ''), 38)
+    + dPad(dTotal(c.deuda > 0 ? 'Saldo pendiente' : 'Estado de la cuenta', c.deuda > 0 ? pesos(c.deuda) : 'Al día', c.deuda > 0 ? (c.vencido > 0 ? pesos(c.vencido) + ' ya vencidos' : 'Dentro de la fecha de pago') : (c.aFavor > 0 ? 'Saldo a favor ' + pesos(c.aFavor) : 'No debe nada'), [['Total cargado', pesos(c.totalCargado)], ['Total abonado', pesos(c.totalPagado + c.totalDescuentos)]]), 38)
+    + (S.cfg.datosPago || (S.cfg.qrs || []).length ? dPad('<div class="d-nota"><div class="d-nt">Cómo pagar</div>' + (S.cfg.datosPago ? '<div class="d-nb" style="white-space:pre-wrap">' + dEsc(S.cfg.datosPago) + '</div>' : '')
+      + ((S.cfg.qrs || []).length ? '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">' + S.cfg.qrs.map(q => '<div style="text-align:center"><img src="' + String(q.img).replace(/["<>\s]/g, '') + '" alt="QR ' + dEsc(q.nombre) + '" style="width:150px;height:150px;object-fit:contain;background:#fff;padding:8px;border-radius:12px;display:block"><div class="d-fs" style="margin-top:6px">' + dEsc(q.nombre) + '</div></div>').join('') + '</div>' : '') + '</div>', 14) : '')
+    + dPie(S.cfg.casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), cod);
+}
+
+/* ---------- aviso para pegar en la casa (una regla en grande) ---------- */
+function avisoHTML(r) {
+  const t = r.corto || r.texto; const px = t.length <= 42 ? 54 : (t.length <= 100 ? 40 : 30);
+  return dTop('Aviso de la casa', S.cfg.casa)
+    + '<div class="d-pad" style="padding:80px 52px 20px;text-align:center"><div class="d-logo" style="margin:0 auto 30px">' + logoHTML() + '</div><div class="d-kicker" style="color:#F5B14C">Ojo · esto es de todos</div>'
+    + '<h1 style="font-size:' + px + 'px;line-height:1.18">' + dEsc(t) + '</h1>'
+    + (r.corto ? '<p style="color:#9CA0B4;font-size:15px;line-height:1.7;margin:28px auto 0;max-width:640px">' + dEsc(r.texto) + '</p>' : '') + '</div>'
+    + '<div style="height:60px"></div>' + dPie(S.cfg.casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Gracias por cuidar la casa');
+}
+
+/* ---------- acuerdo de convivencia ---------- */
+function acuerdoHTML() {
+  const hoy = HOY(), a = arrendador(); const firmes = S.reglas.filter(r => r.firme); let n = 0;
+  const firman = S.personas.filter(p => tiempoVivido(p, hoy).estado !== 'salio');
+  const grupos = gruposReglas(true).map(g => '<div class="d-sec">' + dEsc(g.cat) + '</div><ul class="d-lista">' + g.reglas.map(r => '<li><span class="d-n">' + String(++n).padStart(2, '0') + '</span><span>' + dEsc(r.texto) + '</span></li>').join('') + '</ul>').join('');
+  return dTop('Acuerdo de convivencia · versión ' + S.acuerdoVersion, S.cfg.casa)
+    + dHero(S.cfg.casa + ' · convivencia', 'Acuerdo de convivencia', 'v' + S.acuerdoVersion, dCiudadFecha(hoy))
+    + dPad('<p style="color:#9CA0B4;font-size:13.5px;line-height:1.75;white-space:pre-wrap;margin:0">' + dEsc(introAcuerdo()) + '</p>')
+    + (firmes.length ? dPad('<div class="d-nota" style="border:1px solid rgba(245,177,76,.3);background:#2B2410"><div class="d-nt" style="color:#F5B14C">Lo que sí o sí cuidamos entre todos</div><div class="d-nb">' + firmes.map(r => '• ' + dEsc(r.texto)).join('<br>') + '</div></div>', 24) : '')
+    + dPad(dSeccion('Las reglas') + grupos, 38)
+    + (S.compromisos.length ? dPad(dSeccion('Lo que yo me comprometo contigo') + '<div class="d-nota"><div class="d-nb" style="color:#E8E9F0">' + S.compromisos.map(c => '• ' + dEsc(c.texto)).join('<br>') + '</div></div>', 38) : '')
+    + dPad('<p style="color:#9CA0B4;margin:0 0 6px">Leí este acuerdo, lo entiendo y me comprometo a cumplirlo. Si algo cambia, lo hablamos entre todos.</p>' + dFirmas(firman.map(p => ({ nombre: p.nombre, sub: p.cuarto || 'Habitante' })).concat([{ img: firmaHTML(), nombre: a.nombre, sub: 'Dueño de la casa' }])), 34)
+    + dPie(S.cfg.casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Versión ' + S.acuerdoVersion + ' · ' + fCorta(hoy));
+}
+
+/* ---------- informe de cuentas (cruce de ingresos y servicios) ---------- */
+function informeHTML(desde, hasta) {
+  const hoy = HOY(), a = arrendador(), c = cruceCuentas(S, desde, hasta, hoy), t = c.total; const cod = 'IC-' + hoy.replace(/-/g, '').slice(0, 6);
+  const periodo = desde === hasta ? fMes(desde + '-01') : fMes(desde + '-01') + ' a ' + fMes(hasta + '-01');
+  const corto = m => MES3[+m.slice(5, 7) - 1] + ' ' + m.slice(2, 4);
+  const th = (a1, a2, a3, a4, a5) => '<div class="d-thead"><div>' + a1 + '</div><div>' + a2 + '</div><div class="d-r">' + a3 + '</div><div class="d-r">' + a4 + '</div><div class="d-r">' + a5 + '</div></div>';
+  const filasMes = c.filas.map(f => '<div class="d-fila"><div class="d-n">' + dEsc(corto(f.mes)) + '</div><div class="d-d">Esperado ' + dEsc(pesos(f.esperado)) + (f.abonos ? '<small>Incluye abonos por ' + dEsc(pesos(f.abonos)) + '</small>' : '') + '</div><div class="d-c">' + dEsc(pesos(f.servicios)) + '</div><div class="d-p">' + dEsc(pesos(f.entro)) + '</div><div class="d-s"' + (f.queda < 0 ? ' style="color:#F87171"' : '') + '>' + dEsc(pesos(f.queda)) + '</div></div>').join('');
+  const gastos = S.gastos.filter(g => g.mes >= desde && g.mes <= hasta).sort((x, y) => x.mes < y.mes ? -1 : x.mes > y.mes ? 1 : (x.concepto < y.concepto ? -1 : 1));
+  const filasGasto = gastos.map(g => '<div class="d-fila"><div class="d-n">' + dEsc(corto(g.mes)) + '</div><div class="d-d">' + dEsc(g.concepto) + (g.nota ? '<small>' + dEsc(g.nota) + '</small>' : '') + '</div><div class="d-c">' + (g.pagadoEl ? 'Pagado ' + dEsc(fSinAnio(g.pagadoEl)) : '<span style="color:#F5B14C">Sin pagar</span>') + '</div><div class="d-p"></div><div class="d-s">' + dEsc(pesos(g.valor)) + '</div></div>').join('');
+  const filasPers = S.personas.map(p => { const e = estadoCuenta(S, p, hoy), tv = tiempoVivido(p, hoy); return '<div class="d-fila"><div class="d-n">' + dEsc(p.cuarto || '') + '</div><div class="d-d">' + dEsc(p.nombre) + '<small>' + (tv.estado === 'porLlegar' ? 'Llega el ' + dEsc(fCorta(p.ingreso)) : 'Desde el ' + dEsc(fCorta(p.ingreso)) + ' · ' + tv.dias + ' días') + '</small></div><div class="d-c">' + dEsc(pesos(e.totalCargado)) + '</div><div class="d-p">' + dEsc(pesos(e.totalPagado + e.totalDescuentos)) + '</div><div class="d-s" style="color:' + (e.deuda > 0 ? '#F87171' : '#4ADE80') + '">' + (e.deuda > 0 ? dEsc(pesos(e.deuda)) : (e.aFavor > 0 ? 'A favor ' + dEsc(pesos(e.aFavor)) : 'Al día')) + '</div></div>'; }).join('');
+  return dTop('Informe de cuentas ' + cod, S.cfg.casa)
+    + dHero(S.cfg.casa + ' · cruce de cuentas', 'Informe de cuentas', cod, dCiudadFecha(hoy))
+    + dPartes('Periodo', periodo, ['Informe al ' + fLarga(hoy)], 'Arrendador', a.nombre, a.lineas.length ? a.lineas : [S.cfg.casa])
+    + dFranja([['Entró', pesos(t.entro)], ['Servicios', pesos(t.servicios)], ['Te quedó', pesos(t.queda)], ['Por cobrar hoy', pesos(c.porCobrar)]])
+    + dPad(dSeccion('1. Mes a mes') + th('Mes', 'Detalle', 'Servicios', 'Entró', 'Te quedó') + filasMes, 38)
+    + (gastos.length ? dPad(dSeccion('2. Servicios pagados') + th('Mes', 'Servicio', 'Estado', '', 'Valor') + filasGasto, 38) : '')
+    + dPad(dSeccion((gastos.length ? '3' : '2') + '. Saldo de cada inquilino') + th('Cuarto', 'Inquilino', 'Cargado', 'Abonado', 'Saldo') + filasPers, 38)
+    + dPad(dTotal('Te quedó en el periodo', pesos(t.queda), 'Entró ' + pesos(t.entro) + (t.abonos ? ' (plata ' + pesos(t.recibido) + ' + abonos ' + pesos(t.abonos) + ')' : '') + ' menos servicios ' + pesos(t.servicios) + '.', [['Entró', pesos(t.entro)], ['Servicios', pesos(t.servicios)], ['Por cobrar hoy', pesos(c.porCobrar)]]), 38)
+    + dPie(S.cfg.casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), cod + ' · ' + fCorta(hoy));
+}
+
+/* vista previa dentro de un diálogo: el documento mide 860 px, se reduce para que quepa */
+function previaDoc(html) { return '<div class="prev-wrap"><div class="doc" id="docPrev">' + html + '</div></div>'; }
+function ajustarPrevia(d) {
+  const doc = $('#docPrev', d); if (!doc) return; const ancho = $('.prev-wrap', d).clientWidth - 22;   // 22 = barra de desplazamiento
+  doc.style.zoom = Math.min(1, Math.max(0.3, ancho / 860)).toFixed(3);
+}
+
+/* ===========================================================================
+   Casa Peñuela — lo que ve cada inquilino en su celular (solo lectura).
+   Dos partes:
+   · vistaPayload(): lo que se publica de UNA persona (solo lo suyo: sin notas privadas ni datos de las otras).
+   · vistaHTML():    la pantalla. Los días y los vencimientos se calculan con la fecha de HOY en el celular de quien la abre,
+                     así que avanzan solos sin que David publique nada; los pagos aparecen cuando David los anota.
+   Usa las mismas funciones de logica.js y docs.js que la app: los números no pueden salir distintos.
+   =========================================================================== */
+const VISTA_V = 1;
+
+function vistaPayload(S0, p, ahoraISO) {
+  const c = S0.cfg;
+  // Las rentas se calculan solas con las reglas de la persona; aquí solo van los cobros sueltos y los servicios ya repartidos.
+  const cargos = cargosPersona(S0, p, '0000-01-01').filter(x => x.origen !== 'regla').map(x => ({ id: x.id, fecha: x.fecha, concepto: x.concepto, monto: x.monto }));
+  const pagos = S0.pagos.filter(x => x.personaId === p.id).map(x => ({ id: x.id, fecha: x.fecha, monto: x.monto, tipo: x.tipo, metodo: x.metodo || '', nota: x.nota || '', numero: x.numero || 0 }));
+  const persona = {};
+  ['id', 'nombre', 'cuarto', 'ingreso', 'salida', 'unidad', 'ciclo', 'diaPago', 'momento', 'primerMes', 'cuentaDesde'].forEach(k => { persona[k] = p[k] === undefined ? null : p[k]; });
+  persona.precios = (p.precios || []).map(x => ({ desde: x.desde, monto: x.monto }));
+  return {
+    v: VISTA_V, generado: ahoraISO, acuerdoVersion: S0.acuerdoVersion || 1,
+    cfg: { casa: c.casa, dueno: c.dueno, duenoCompleto: c.duenoCompleto, ciudad: c.ciudad, telefonos: c.telefonos || '', correo: c.correo || '', redondeo: c.redondeo, gracia: c.gracia, datosPago: c.datosPago || '', qrs: (c.qrs || []).map(q => ({ nombre: q.nombre, img: q.img })) },
+    persona, cargos, pagos
+  };
+}
+
+function estadoDesdePayload(pl) {
+  const s = estadoVacio();
+  s.cfg = Object.assign(s.cfg, pl.cfg);
+  s.personas = [Object.assign({ deposito: { acordado: 0, recibido: 0, devuelto: 0 }, lista: [], acuerdo: null }, pl.persona)];
+  s.cargos = pl.cargos.map(x => Object.assign({ personaId: pl.persona.id }, x));
+  s.pagos = pl.pagos.map(x => Object.assign({ personaId: pl.persona.id }, x));
+  s.acuerdoVersion = pl.acuerdoVersion || 1;
+  return normalizar(s);
+}
+
+function vistaFechaHora(iso) {
+  const d = new Date(iso); if (isNaN(d)) return { dia: '', hora: '' };
+  const z = 'America/Bogota';
+  return {
+    dia: d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric', timeZone: z }).replace(/\./g, '').replace(/ de /g, ' '),
+    hora: d.toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', timeZone: z }).replace(/\s+/g, ' ')
+  };
+}
+
+function vistaMovimiento(e) {
+  if (e.k === 'cargo') {
+    return '<div class="v-mov"><div class="v-mi"><b>' + dEsc(e.c.concepto) + '</b><small>' + dEsc(fCorta(e.c.fecha)) + ' · Cobro</small></div>'
+      + '<div class="v-ma">' + dEsc(pesos(e.c.monto)) + '<small>Saldo ' + dEsc(pesos(e.saldo)) + '</small></div></div>';
+  }
+  const x = e.x;
+  return '<div class="v-mov"><div class="v-mi"><b>' + dEsc(detalleCredito(x)) + '</b><small>' + dEsc(fCorta(x.fecha))
+    + (x.nota ? ' · ' + dEsc(x.nota) : '') + (x.numero ? ' · Recibo R-' + String(x.numero).padStart(4, '0') : '') + '</small></div>'
+    + '<div class="v-ma v-pago">−' + dEsc(pesos(x.monto)) + '<small>Saldo ' + dEsc(pesos(e.saldo)) + '</small></div></div>';
+}
+
+/* base = dirección del sitio (para los enlaces al acuerdo y al aviso de la lavadora). */
+function vistaHTML(pl, hoy, base) {
+  const p = S.personas[0], t = tiempoVivido(p, hoy), c = estadoCuenta(S, p, hoy), cic = cicloActual(p, hoy);
+  const nombre1 = (p.nombre || '').trim().split(/\s+/)[0] || p.nombre;
+  const gen = vistaFechaHora(pl.generado);
+  const casa = S.cfg.casa || 'Casa Peñuela';
+
+  // 1) los días en la casa
+  let dias;
+  if (t.estado === 'porLlegar') dias = '<div class="v-k">Llegas a la casa</div><div class="v-big">' + t.faltan + ' <span>' + (t.faltan === 1 ? 'día' : 'días') + '</span></div><div class="v-sub">Tu llegada es el ' + dEsc(fCorta(p.ingreso)) + (p.cuarto ? ' · ' + dEsc(p.cuarto) : '') + '</div>';
+  else dias = '<div class="v-k">' + (t.estado === 'salio' ? 'Viviste en la casa' : 'Llevas en la casa') + '</div><div class="v-big">' + t.dias + ' <span>' + (t.dias === 1 ? 'día' : 'días') + '</span></div>'
+    + '<div class="v-sub">Desde el ' + dEsc(fCorta(p.ingreso)) + (p.cuarto ? ' · ' + dEsc(p.cuarto) : '') + (t.mesesTotal ? ' · ' + dEsc(t.texto) : '') + '</div>';
+
+  // 2) el periodo de pago en curso
+  let ciclo = '';
+  if (cic) {
+    const prox = c.proximo; const finTxt = prox ? fCorta(prox.fecha) : fCorta(cic.fin);
+    const faltan = prox ? dif(prox.fecha, hoy) : cic.faltan;
+    ciclo = '<div class="v-card" style="margin-top:12px"><div class="v-k">Tu periodo de pago</div>'
+      + '<div class="v-fila"><b>Día ' + cic.dia + ' de ' + cic.total + '</b><span>' + (faltan > 0 ? 'faltan ' + plural(faltan, 'día', 'días') + ' para el próximo pago' : 'el próximo pago es hoy') + '</span></div>'
+      + '<div class="v-barra"><i style="width:' + cic.pct + '%"></i></div>'
+      + '<div class="v-sub">Próximo pago: ' + dEsc(finTxt) + (prox ? ' · ' + dEsc(pesos(prox.pendiente)) : '') + '</div></div>';
+  }
+
+  // 3) cuánto debe
+  let total;
+  if (c.deuda > 0) total = dTotal('Lo que debes hoy', pesos(c.deuda), c.vencido > 0 ? pesos(c.vencido) + ' ya pasó su fecha de pago' : 'Todavía estás dentro de la fecha de pago', [['Total cobrado', pesos(c.totalCargado)], ['Total abonado', pesos(c.totalPagado + c.totalDescuentos)]]);
+  else total = dTotal('Tu cuenta', 'Al día', c.aFavor > 0 ? 'Tienes ' + pesos(c.aFavor) + ' a tu favor' : 'No debes nada', [['Total cobrado', pesos(c.totalCargado)], ['Total abonado', pesos(c.totalPagado + c.totalDescuentos)]]);
+
+  // 4) movimientos (lo más nuevo arriba) y próximos cobros
+  const libro = c.libro.slice().reverse().map(vistaMovimiento).join('');
+  const prox = c.proximos.slice(0, 2).map(x => '<div class="v-mov"><div class="v-mi"><b>' + dEsc(x.concepto) + '</b><small>' + dEsc(fCorta(x.fecha)) + ' · Próximo cobro</small></div><div class="v-ma">' + dEsc(pesos(x.monto)) + '</div></div>').join('');
+
+  // 5) cómo pagar
+  const qrs = (S.cfg.qrs || []).length ? '<div class="v-qrs">' + S.cfg.qrs.map(q => '<div><img src="' + String(q.img).replace(/["<>\s]/g, '') + '" alt="QR ' + dEsc(q.nombre) + '"><span>' + dEsc(q.nombre) + '</span></div>').join('') + '</div>' : '';
+  const pagar = '<div class="d-nota"><div class="d-nt">Cómo pagar</div>'
+    + (S.cfg.datosPago ? '<div class="d-nb" style="white-space:pre-wrap">' + dEsc(S.cfg.datosPago) + '</div>' : '')
+    + qrs + '<div class="d-nb" style="margin-top:' + (S.cfg.datosPago || qrs ? '10' : '0') + 'px">Cuando pagues, avísale a ' + dEsc(S.cfg.dueno || 'David') + ' por WhatsApp para que lo anote. Apenas lo anote, aparece aquí.</div></div>';
+
+  // 6) para leer
+  const b = (base || '').replace(/\/+$/, '');
+  const leer = '<div class="v-enlaces"><a href="' + dEsc(b + '/acuerdo/') + '"><b>Acuerdo de convivencia</b><span>Cómo cuidamos la casa entre todos</span></a>'
+    + '<a href="' + dEsc(b + '/lavadora/') + '"><b>Aviso de la lavadora</b><span>Máximo 3 veces por semana por persona</span></a></div>';
+
+  return dTop('Tu cuenta · ' + casa, 'Al ' + fCorta(hoy))
+    + '<div class="d-hero"><div class="d-hero-in"><div class="d-logo">' + LOGO_SVG + '</div><div style="flex-grow:1"><div class="d-kicker">Hola, ' + dEsc(nombre1) + '</div><h1>Tu cuenta en la casa</h1></div><div style="display:none"></div></div></div>'
+    + dPad('<div class="v-card v-dias">' + dias + '</div>' + ciclo, 26)
+    + dPad(total, 14)
+    + dPad(dSeccion('Tus movimientos') + (libro || '<div class="v-sub">Todavía no hay movimientos.</div>')
+      + (prox ? '<div class="d-sec">Lo que viene</div>' + prox : ''), 34)
+    + dPad(pagar, 26)
+    + dPad(dSeccion('Para leer') + leer, 34)
+    + dPad('<p class="v-nota">Los días se cuentan solos. Los pagos aparecen cuando ' + dEsc(S.cfg.dueno || 'David') + ' los anota. Lo último que anotó fue el ' + dEsc(gen.dia) + (gen.hora ? ', ' + dEsc(gen.hora) : '') + '. Si pagaste después, todavía no se ve. Si algo no te cuadra, escríbele con calma y lo revisamos.</p>', 26)
+    + dPie(casa + (S.cfg.ciudad ? ' · ' + S.cfg.ciudad : ''), 'Cuenta al ' + gen.dia);
+}
+
+
+const CONFIG = { api: 'https://firestore.googleapis.com/v1/projects/casa-penuela/databases/(default)/documents', key: 'AIzaSyD6W9Sp91nrU3n7_t50upi_36HmUmXTmTg', base: '..' };
+if (LOCAL && params.get('api')) CONFIG.api = params.get('api');   // solo para pruebas en el computador de David
+function pantallaAviso(titulo, texto) { return '<div class="doc movil"><div class="v-aviso"><h1>' + dEsc(titulo) + '</h1><p>' + dEsc(texto) + '</p></div></div>'; }
+function claveDeLaUrl() { return decodeURIComponent((location.hash || '').replace(/^#\/?/, '')).trim(); }
+function leerMemo(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
+function guardarMemo(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sin almacenamiento */ } }
+async function traer() {
+  const clave = claveDeLaUrl();
+  if (!/^[A-Za-z0-9_-]{20,80}$/.test(clave)) throw new Error('Este enlace está incompleto. Pídele a David que te lo mande otra vez.');
+  const memo = 'cuenta_' + clave.slice(0, 10);
+  const deMemoria = () => { const g = leerMemo(memo); if (g) g.__memoria = true; return g; };
+  let r;
+  try { r = await fetch(CONFIG.api + '/vistas/' + encodeURIComponent(clave) + '?key=' + encodeURIComponent(CONFIG.key), { cache: 'no-store' }); }
+  catch (e) { const g = deMemoria(); if (g) return g; throw new Error('No hay internet y todavía no habías abierto tu cuenta en este celular. Conéctate y vuelve a abrir el enlace.'); }
+  if (r.status === 404) { try { localStorage.removeItem(memo); } catch (e) { /* nada */ } throw new Error('Este enlace ya no sirve. Pídele a David que te mande el nuevo.'); }
+  if (!r.ok) { const g = deMemoria(); if (g) return g; throw new Error('No pude abrir tu cuenta en este momento (' + r.status + '). Intenta de nuevo en un rato.'); }
+  const d = await r.json(); const pl = JSON.parse(d.fields.json.stringValue); guardarMemo(memo, pl); return pl;
+}
+async function pintar() {
+  const cont = document.getElementById('app');
+  try {
+    const pl = await traer();
+    S = estadoDesdePayload(pl);
+    cont.innerHTML = '<div class="doc movil">' + (pl.__memoria ? '<div class="v-sinred">Sin internet: te muestro lo último que viste. Los días sí están al día de hoy; los pagos nuevos se ven cuando vuelvas a tener internet.</div>' : '') + vistaHTML(pl, HOY(), CONFIG.base) + '</div>';
+  } catch (e) { cont.innerHTML = pantallaAviso('No pude abrir tu cuenta', (e && e.message) || 'Pídele a David que te mande el enlace otra vez.'); }
+}
+pintar();
+window.addEventListener('hashchange', pintar);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) pintar(); });
+
+</script></body></html>
