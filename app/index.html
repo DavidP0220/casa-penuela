@@ -2422,6 +2422,12 @@ function nubeClaveNueva() {
 function nubeMetaLeer() { try { const m = JSON.parse(localStorage.getItem(NUBE_META)); if (m && typeof m === 'object') return Object.assign({ rev: 0, hash: '', vistas: {} }, m); } catch (e) { /* nada */ } return { rev: 0, hash: '', vistas: {} }; }
 function nubeMetaGuardar() { try { localStorage.setItem(NUBE_META, JSON.stringify(NUBE.meta)); } catch (e) { /* nada */ } }
 function nubeHayDatos() { return !!(S.personas.length || S.pagos.length || S.cargos.length || S.facturas.length); }
+function nubeContar(json) {   // cuántas personas, pagos, cargos y facturas trae un estado guardado, sin armar la app
+  let o = {}; try { o = JSON.parse(json) || {}; } catch (e) { /* queda en cero */ }
+  const n = k => (Array.isArray(o[k]) ? o[k].length : 0);
+  return { personas: n('personas'), pagos: n('pagos'), cargos: n('cargos'), facturas: n('facturas') };
+}
+function nubeJsonVacio(json) { const c = nubeContar(json); return !(c.personas || c.pagos || c.cargos || c.facturas); }
 /* Separa lo liviano (estado) de las imágenes pesadas: cada documento de Firestore tiene tope de 1 MiB. La clave de envío automático nunca sale de este aparato. */
 function nubePartir() {
   const c = sinSecretos(S); const img = { firma: c.cfg.firma || '', logo: c.cfg.logo || '', qrs: {} };
@@ -2456,7 +2462,7 @@ function nubeTextoEstado() {
     case 'cargando': return 'Conectando…';
     case 'sinSesion': return 'Falta entrar con tu cuenta de Google.';
     case 'sincronizando': return 'Sincronizando…';
-    case 'conectada': return '<b class="pos">Todo guardado en la nube</b>' + (hora ? ' (última vez a las ' + esc(hora) + ')' : '') + (NUBE.user && NUBE.user.email ? ' · ' + esc(NUBE.user.email) : '');
+    case 'conectada': return '<b class="pos">Todo guardado en la nube</b>' + (hora ? ' (última vez a las ' + esc(hora) + ')' : '') + ' · ' + S.personas.length + (S.personas.length === 1 ? ' persona' : ' personas') + (NUBE.meta.rev ? ' · versión ' + NUBE.meta.rev : '') + (NUBE.user && NUBE.user.email ? ' · ' + esc(NUBE.user.email) : '');
     case 'sinConexion': return '<b class="neg">Sin conexión con la nube.</b> Tus cambios quedan en este aparato y se suben solos cuando vuelva' + (NUBE.detalle ? ' <small>(' + esc(NUBE.detalle) + ')</small>' : '') + '.';
     case 'sinPermiso': return '<b class="neg">Esa cuenta de Google no tiene permiso</b> sobre estos datos. Entra con la cuenta de David.';
     case 'conflicto': return '<b class="neg">Hay dos versiones de tus datos.</b> Falta que escojas cuál usar.';
@@ -2510,13 +2516,14 @@ ACC.nubeSalir = async () => { try { await NUBE.au.signOut(NUBE.auth); toast('Sal
 async function nubeConectar() {
   if (NUBE.subiendo) return;
   nubeEstado('sincronizando');
-  const { doc, getDoc } = NUBE.fs;
+  const { doc, getDocFromServer } = NUBE.fs;
   try {
-    const s = await getDoc(doc(NUBE.db, 'estado', 'principal'));
-    if (!s.exists()) { NUBE.meta.rev = 0; NUBE.meta.hash = ''; }       // la nube está vacía: lo de aquí se sube tal cual
+    const s = await getDocFromServer(doc(NUBE.db, 'estado', 'principal'));
+    if (!s.exists()) { NUBE.meta.rev = 0; NUBE.meta.hash = ''; }       // la nube no tiene nada: si aquí hay datos se suben tal cual (un aparato vacío no crea nada)
     else {
       const d = s.data(), sucio = nubeSucio();
-      if (d.rev === NUBE.meta.rev) { /* misma versión: si hay cambios aquí, se suben más abajo */ }
+      if (nubeJsonVacio(d.json) && nubeHayDatos() && (NUBE.meta.rev === 0 || d.rev === NUBE.meta.rev)) { NUBE.meta.rev = d.rev; NUBE.meta.hash = ''; }   // la nube quedó vacía y aquí hay datos: se suben, sin preguntar
+      else if (d.rev === NUBE.meta.rev) { /* misma versión: si hay cambios aquí, se suben más abajo */ }
       else if (d.rev > NUBE.meta.rev && (NUBE.meta.rev > 0 ? !sucio : !nubeHayDatos())) await nubeAdoptar(d);   // aparato nuevo y vacío: toma lo de la nube sin preguntar
       else { NUBE.conflicto = d.rev; nubeEstado('conflicto'); nubeResolver(); return; }
     }
@@ -2529,8 +2536,8 @@ async function nubeConectar() {
   }
 }
 async function nubeAdoptar(d) {
-  const { doc, getDoc } = NUBE.fs;
-  const im = await getDoc(doc(NUBE.db, 'estado', 'imagenes'));
+  const { doc, getDocFromServer } = NUBE.fs;
+  const im = await getDocFromServer(doc(NUBE.db, 'estado', 'imagenes'));
   const nuevo = nubeUnir(d.json, im.exists() ? im.data().json : '');
   try { localStorage.setItem(KEY + '_antes_nube_' + Date.now(), JSON.stringify(S)); } catch (e) { /* nada */ }   // por si acaso
   S = nuevo; pilaDeshacer = []; NUBE.meta.rev = d.rev; NUBE.meta.hash = nubeHash(nubePartir().estado); nubeMetaGuardar();
@@ -2562,7 +2569,7 @@ function nubeResolver() {
 ACC.nubeResolver = nubeResolver;
 ACC.nubeUsarNube = async () => {
   ACC.cerrarDlg();
-  try { const { doc, getDoc } = NUBE.fs; const s = await getDoc(doc(NUBE.db, 'estado', 'principal')); if (s.exists()) await nubeAdoptar(s.data()); NUBE.conflicto = null; NUBE.ultima = Date.now(); nubeEstado('conectada'); nubeEscuchar(); await nubeSubir(); }
+  try { const { doc, getDocFromServer } = NUBE.fs; const s = await getDocFromServer(doc(NUBE.db, 'estado', 'principal')); if (s.exists()) await nubeAdoptar(s.data()); NUBE.conflicto = null; NUBE.ultima = Date.now(); nubeEstado('conectada'); nubeEscuchar(); await nubeSubir(); }
   catch (e) { nubeEstado('sinConexion', e); }
 };
 ACC.nubeUsarAqui = async () => {
@@ -2583,17 +2590,29 @@ async function nubeSubir() {
     nubeAsegurarClaves();
     const { estado, imagenes } = nubePartir(), h = nubeHash(estado);
     if (h !== NUBE.meta.hash) {
-      if (estado.length > 900000 || imagenes.length > 900000) throw new Error('Los datos pesan demasiado para la nube (límite 1 MB por documento): quita imágenes grandes');
-      const { doc, runTransaction, serverTimestamp } = NUBE.fs;
-      const refE = doc(NUBE.db, 'estado', 'principal'), refI = doc(NUBE.db, 'estado', 'imagenes');
-      const nueva = await runTransaction(NUBE.db, async tx => {
-        const s = await tx.get(refE), rev = s.exists() ? (s.data().rev || 0) : 0;
-        if (rev !== (NUBE.meta.rev || 0)) { const x = new Error('conflicto'); x.rev = rev; x.conflicto = true; throw x; }
-        tx.set(refE, { rev: rev + 1, json: estado, t: serverTimestamp() });
-        tx.set(refI, { rev: rev + 1, json: imagenes });
-        return rev + 1;
-      });
-      NUBE.meta.rev = nueva; NUBE.meta.hash = h; nubeMetaGuardar();
+      if (!nubeHayDatos() && !(NUBE.meta.rev > 0)) { NUBE.meta.hash = h; nubeMetaGuardar(); }   // no hay nada que guardar y la nube nunca tuvo nada de aquí: no se crea un estado vacío
+      else {
+        if (estado.length > 900000 || imagenes.length > 900000) throw new Error('Los datos pesan demasiado para la nube (límite 1 MB por documento): quita imágenes grandes');
+        const { doc, runTransaction, serverTimestamp, getDocFromServer } = NUBE.fs;
+        const refE = doc(NUBE.db, 'estado', 'principal'), refI = doc(NUBE.db, 'estado', 'imagenes');
+        const hoy = new Date().toISOString().slice(0, 10), refU = doc(NUBE.db, 'estado', 'copia-ultima'), refD = doc(NUBE.db, 'estado', 'copia-dia-' + new Date().getDay());
+        const nueva = await runTransaction(NUBE.db, async tx => {
+          const s = await tx.get(refE), dia = await tx.get(refD), rev = s.exists() ? (s.data().rev || 0) : 0;
+          if (rev !== (NUBE.meta.rev || 0)) { const x = new Error('conflicto'); x.rev = rev; x.conflicto = true; throw x; }
+          const previo = s.exists() ? s.data() : null;
+          if (previo && !nubeJsonVacio(previo.json)) {   // lo que se va a reemplazar queda de copia; un estado vacío nunca pisa una copia buena
+            const copia = { rev, json: previo.json, t: previo.t || serverTimestamp(), dia: hoy, personas: nubeContar(previo.json).personas };
+            tx.set(refU, copia);                                                          // la versión de justo antes del último cambio
+            if (!dia.exists() || dia.data().dia !== hoy) tx.set(refD, copia);             // la primera de cada día (siete casillas, una por día de la semana)
+          }
+          tx.set(refE, { rev: rev + 1, json: estado, t: serverTimestamp() });
+          tx.set(refI, { rev: rev + 1, json: imagenes });
+          return rev + 1;
+        });
+        const leido = await getDocFromServer(refE);                                       // "guardado" solo si se vuelve a leer del servidor y está
+        if (!leido.exists() || leido.data().rev !== nueva) throw new Error('no-confirmado');
+        NUBE.meta.rev = nueva; NUBE.meta.hash = h; nubeMetaGuardar();
+      }
     }
     await nubePublicarVistas();
     NUBE.ultima = Date.now(); nubeEstado('conectada');
@@ -2632,22 +2651,46 @@ async function nubePublicarVistas() {
 function nubeAjustesHTML() {
   const sesion = NUBE.user ? '<button class="btn" data-a="nubeSalir" type="button">Salir de mi cuenta de Google</button>' : (nubePosible() ? '<button class="btn primario" data-a="nubeEntrar" type="button">Entrar con Google</button>' : '');
   return '<div class="card mt"><h2>Nube</h2><p class="peq">Tus datos se guardan también en tu cuenta de Google (Firebase, gratis), para ver lo mismo en el celular y en el computador. Cada inquilino abre solo su cuenta con un enlace propio; nadie más puede ver lo tuyo.</p>'
-    + '<p id="nubeEstadoTxt">' + nubeTextoEstado() + '</p><div class="fila">' + sesion + '</div></div>';
+    + '<p id="nubeEstadoTxt">' + nubeTextoEstado() + '</p><div class="fila">' + sesion
+    + (NUBE.user ? '<button class="btn" data-a="nubeCopias" type="button">Copias anteriores en la nube</button>' : '') + '</div>'
+    + '<p class="peq muted">Cada vez que cambias algo, la nube guarda también la versión de justo antes, y la primera de cada día. Si algo sale mal, aquí las recuperas.</p></div>';
 }
+ACC.nubeCopias = async () => {
+  if (!NUBE.user || !NUBE.db) { toast('Primero entra con tu cuenta de Google.'); return; }
+  const { doc, getDocFromServer } = NUBE.fs;
+  const ids = ['copia-ultima'].concat([0, 1, 2, 3, 4, 5, 6].map(i => 'copia-dia-' + i));
+  const lista = (await Promise.all(ids.map(id => getDocFromServer(doc(NUBE.db, 'estado', id)).then(s => (s.exists() ? Object.assign({ id }, s.data()) : null)).catch(() => null))))
+    .filter(Boolean).sort((a, b) => ((b.t && b.t.seconds) || 0) - ((a.t && a.t.seconds) || 0));
+  const filas = lista.map(c => {
+    const n = nubeContar(c.json), f = c.t && c.t.toDate ? c.t.toDate().toLocaleString('es-CO', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'fecha desconocida';
+    return '<div class="fila" style="justify-content:space-between;align-items:center"><span>' + (c.id === 'copia-ultima' ? '<b>La de justo antes del último cambio</b>' : 'Copia del día') + '<br><small class="muted">' + esc(f) + ' · ' + n.personas + (n.personas === 1 ? ' persona' : ' personas') + ', ' + n.pagos + ' pagos</small></span><button class="btn chico" data-a="nubeRestaurar" data-id="' + esc(c.id) + '" type="button">Restaurar</button></div>';
+  }).join('');
+  dialogo({ titulo: 'Copias anteriores en la nube', cuerpo: lista.length ? '<p class="peq">Al restaurar, lo que tienes ahora se reemplaza por esa copia (y lo de ahora queda como copia).</p>' + filas : '<p>Todavía no hay copias: se crean solas la primera vez que cambias algo con datos guardados.</p>', pie: '<button type="button" class="btn" data-a="cerrarDlg">Cerrar</button>' });
+};
+ACC.nubeRestaurar = d => {
+  confirmar('Restaurar esta copia', 'Lo que ves ahora se reemplaza por esa copia. Lo de ahora queda guardado como copia anterior.', 'Restaurar', async () => {
+    try {
+      const { doc, getDocFromServer } = NUBE.fs;
+      const c = await getDocFromServer(doc(NUBE.db, 'estado', d.id)); if (!c.exists()) { toast('Esa copia ya no está.', { error: true }); return; }
+      const im = await getDocFromServer(doc(NUBE.db, 'estado', 'imagenes'));
+      const nuevo = nubeUnir(c.data().json, im.exists() ? im.data().json : '');
+      try { localStorage.setItem(KEY + '_antes_restaurar_' + Date.now(), JSON.stringify(S)); } catch (e) { /* nada */ }
+      S = nuevo; pilaDeshacer = []; guardar(); render(); toast('Se restauró la copia.');
+    } catch (e) { toast('No pude restaurar: ' + nubeCodigo(e), { error: true }); }
+  });
+};
 function nubeTarjetaPersona(p) {
   const enl = nubeEnlace(p);
   let cuerpo;
   if (NUBE.estado === 'apagada') cuerpo = '<p class="muted">Se prepara cuando abres la app desde su dirección en internet y entras con Google.</p>';
   else if (!enl) cuerpo = '<p class="muted">El enlace se crea en cuanto la app se sincronice con la nube.</p>';
   else {
-    const nom = primerNombre(p), pub = nubeEnlace(p, true), prueba = location.hostname === 'localhost';
+    const nom = primerNombre(p), pub = nubeEnlace(p, true);
     cuerpo = '<p class="peq">Con su enlace ' + esc(nom) + ' ve su propia cuenta en el celular: los días que lleva, lo que debe y sus pagos. Los días se cuentan solos; los pagos aparecen cuando los anotas aquí. No se ve nada de los demás.</p>'
       + '<p class="mt2"><b>El enlace que se le manda a ' + esc(nom) + ' por WhatsApp:</b></p><p style="word-break:break-all"><small class="mono">' + esc(pub) + '</small></p>'
-      + (prueba ? '<p class="peq aviso-caja">Este enlace todavía <b>no funciona</b>: la página de cuentas aún no está publicada en internet. Cuando la publiquemos, queda activo. Por ahora no se lo mandes.</p>'
-        + '<p class="mt2"><b>Para probar ahora, solo en este computador:</b></p><p style="word-break:break-all"><small class="mono">' + esc(enl) + '</small></p>' : '')
       + '<div class="fila"><button class="btn primario chico" data-a="nubeCopiarEnlace" data-id="' + p.id + '" type="button">Copiar el enlace para mandar</button>'
-      + (p.telefono && !prueba ? '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(waLink(p.telefono, 'Hola ' + nom + ', aquí puedes ver tu cuenta de la casa (los días que llevas, lo que debes y tus pagos). Se actualiza sola: ' + pub)) + '">Mandar por WhatsApp</a>' : '')
-      + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(enl) + '">' + (prueba ? 'Ver cómo la ve (prueba)' : 'Ver cómo la ve') + '</a>'
+      + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(waLink(p.telefono, 'Hola ' + nom + ', aquí puedes ver tu cuenta de la casa (los días que llevas, lo que debes y tus pagos). Se actualiza sola: ' + pub)) + '">Mandar por WhatsApp</a>'
+      + '<a class="btn chico" target="_blank" rel="noopener" href="' + esc(pub) + '">Ver cómo la ve</a>'
       + '<button class="btn chico fantasma" data-a="nubeNuevaClave" data-id="' + p.id + '" type="button">Cambiar el enlace</button></div>';
   }
   return '<div class="titulo-sec"><h2>Su cuenta en el celular</h2></div><div class="card">' + cuerpo + '</div>';
