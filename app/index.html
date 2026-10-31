@@ -2516,7 +2516,7 @@ async function nubeConectar() {
     else {
       const d = s.data(), sucio = nubeSucio();
       if (d.rev === NUBE.meta.rev) { /* misma versión: si hay cambios aquí, se suben más abajo */ }
-      else if (d.rev > NUBE.meta.rev && !sucio && (NUBE.meta.rev > 0 || !nubeHayDatos())) await nubeAdoptar(d);
+      else if (d.rev > NUBE.meta.rev && (NUBE.meta.rev > 0 ? !sucio : !nubeHayDatos())) await nubeAdoptar(d);   // aparato nuevo y vacío: toma lo de la nube sin preguntar
       else { NUBE.conflicto = d.rev; nubeEstado('conflicto'); nubeResolver(); return; }
     }
     NUBE.ultima = Date.now(); nubeMetaGuardar(); nubeEstado('conectada'); nubeEscuchar();
