@@ -986,11 +986,13 @@ function vistaFormularios(pl, ui) {
   const firmada = pl.aceptacion && pl.aceptacion.version >= ver ? pl.aceptacion : (u.acepto && u.acepto.version >= ver ? u.acepto : null);
   const vieja = !firmada && ((pl.aceptacion && pl.aceptacion.version < ver) || (u.acepto && u.acepto.version < ver));
   let acepto;
+  const pendiente = !!firmada && firmada === u.acepto && firmada !== pl.aceptacion;   // firmó desde este celular y David todavía no lo ha confirmado
   if (firmada) acepto = '<div class="v-card v-ok"><div class="v-k">Acuerdo de convivencia</div><div class="v-ok-t">✓ Aceptaste el acuerdo</div><div class="v-sub">'
-    + (firmada.fecha ? 'El ' + dEsc(fCorta(firmada.fecha)) : '') + (firmada.nombre ? (firmada.fecha ? ' · ' : '') + 'firmaste como «' + dEsc(firmada.nombre) + '»' : '') + '. Gracias.</div></div>';
+    + (firmada.fecha ? 'El ' + dEsc(fCorta(firmada.fecha)) : '') + (firmada.nombre ? (firmada.fecha ? ' · ' : '') + 'firmaste como «' + dEsc(firmada.nombre) + '»' : '') + '. ' + (pendiente ? dEsc((S.cfg && S.cfg.dueno) || 'David') + ' lo va a confirmar. ' : '') + 'Gracias.</div></div>';
   else acepto = '<div class="v-card v-form" id="v-acepto"><div class="v-k">Acuerdo de convivencia</div>'
-    + '<p class="v-p">' + (vieja ? 'El acuerdo cambió desde la última vez que lo aceptaste. Léelo de nuevo (arriba, en «Para leer») y, si estás de acuerdo, vuelve a aceptarlo.' : 'Léelo con calma (arriba, en «Para leer»). Si estás de acuerdo, escribe tu nombre completo y toca Aceptar.') + '</p>'
+    + '<p class="v-p">' + (vieja ? 'El acuerdo cambió desde la última vez que lo aceptaste. Léelo de nuevo (arriba, en «Para leer») y, si estás de acuerdo, vuelve a aceptarlo.' : 'Léelo con calma (arriba, en «Para leer»). Si estás de acuerdo, escribe tu nombre completo y tu número de cédula, como en tu documento, y toca Aceptar. Así queda claro que firmas tú.') + '</p>'
     + '<input id="v-nom" class="v-in" type="text" maxlength="80" autocomplete="name" autocapitalize="words" placeholder="Tu nombre completo" aria-label="Tu nombre completo">'
+    + '<input id="v-doc" class="v-in" type="text" inputmode="numeric" maxlength="16" autocomplete="off" placeholder="Tu número de cédula" aria-label="Tu número de cédula">'
     + '<label class="v-chk"><input id="v-chk" type="checkbox"><span>Leí el acuerdo de convivencia y lo acepto</span></label>'
     + '<button id="v-btn-acepto" class="v-btn" type="button" disabled>Aceptar el acuerdo</button><p id="v-msg-acepto" class="v-msg" role="status"></p></div>';
   const sugerencia = '<div class="v-card v-form" id="v-sugerir"><div class="v-k">Escríbele a ' + dueno + '</div>'
@@ -1094,14 +1096,16 @@ function textoError(e, accion) {
   if (e && e.status === 403) return 'No se pudo guardar. Revisa que tu enlace sea el que te mandó ' + quien() + ' y que la fecha y la hora de tu celular estén bien.';
   return 'No se pudo guardar (' + ((e && e.status) || 'error') + '). Intenta de nuevo en un rato.';
 }
-function actualizarAcepto() { const b = byId('v-btn-acepto'); if (b) b.disabled = !(valor('v-nom').trim().length >= 3 && marcado('v-chk')); }
+function digitos(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
+function cedulaOk() { const d = digitos(valor('v-doc')); return d.length >= 6 && d.length <= 12; }
+function actualizarAcepto() { const b = byId('v-btn-acepto'); if (b) b.disabled = !(valor('v-nom').trim().length >= 3 && cedulaOk() && marcado('v-chk')); }
 function actualizarSug() { const b = byId('v-btn-sug'), c = byId('v-cuenta'); if (c) c.textContent = valor('v-sug').length; if (b) b.disabled = !valor('v-sug').trim(); }
 async function aceptar() {
   const clave = claveDeLaUrl(), nom = valor('v-nom').trim().replace(/\s+/g, ' '), btn = byId('v-btn-acepto'), msg = byId('v-msg-acepto');
-  if (!btn || nom.length < 3 || !marcado('v-chk') || !PL) return;
+  if (!btn || nom.length < 3 || !cedulaOk() || !marcado('v-chk') || !PL) return;
   const version = PL.acuerdoVersion || 1; btn.disabled = true; mensaje(msg, 'Guardando…', '');
   let nombreFirmado = nom;
-  try { await escribir('aceptaciones', clave + '_' + version, { clave: { stringValue: clave }, nombre: { stringValue: nom }, version: { integerValue: String(version) }, t: { timestampValue: new Date().toISOString() } }); }
+  try { await escribir('aceptaciones', clave + '_' + version, { clave: { stringValue: clave }, nombre: { stringValue: nom }, documento: { stringValue: digitos(valor('v-doc')) }, version: { integerValue: String(version) }, t: { timestampValue: new Date().toISOString() } }); }
   catch (e) { if (e.status === 409) nombreFirmado = ''; else { mensaje(msg, textoError(e, 'Aceptar'), 'mal'); actualizarAcepto(); return; } }   // 409: ya estaba aceptado desde otro aparato
   guardarMemo('cp_acepto_' + clave.slice(0, 10), { version, fecha: hoyReal(), nombre: nombreFirmado });
   await pintar();
@@ -1156,18 +1160,18 @@ async function traer() {
 }
 async function pintar() {
   const cont = byId('app');
-  const borrador = { nom: valor('v-nom'), chk: marcado('v-chk'), sug: valor('v-sug') };   // lo que estaba escribiendo no se pierde si la página se refresca
+  const borrador = { nom: valor('v-nom'), doc: valor('v-doc'), chk: marcado('v-chk'), sug: valor('v-sug') };   // lo que estaba escribiendo no se pierde si la página se refresca
   try {
     const pl = await traer(); PL = pl;
     S = estadoDesdePayload(pl);
     const clave = claveDeLaUrl(), ui = { acepto: leerMemo('cp_acepto_' + clave.slice(0, 10)), sugHoy: leerMemo('cp_sug_' + clave.slice(0, 10)) === hoyUTC() };
     cont.innerHTML = '<div class="doc movil">' + (pl.__memoria ? '<div class="v-sinred">Sin internet: te muestro lo último que viste. Los días sí están al día de hoy; los pagos nuevos se ven cuando vuelvas a tener internet.</div>' : '') + vistaHTML(pl, HOY(), CONFIG.base, ui) + '</div>';
-    if (byId('v-nom')) { byId('v-nom').value = borrador.nom; byId('v-chk').checked = borrador.chk; }
+    if (byId('v-nom')) { byId('v-nom').value = borrador.nom; byId('v-doc').value = borrador.doc; byId('v-chk').checked = borrador.chk; }
     if (byId('v-sug')) byId('v-sug').value = borrador.sug;
     actualizarAcepto(); actualizarSug(); prepararInstalacion();
   } catch (e) { cont.innerHTML = pantallaAviso('No pude abrir tu cuenta', (e && e.message) || 'Pídele a David que te mande el enlace otra vez.'); }
 }
-document.addEventListener('input', e => { const i = e.target && e.target.id; if (i === 'v-nom') actualizarAcepto(); else if (i === 'v-sug') actualizarSug(); });
+document.addEventListener('input', e => { const i = e.target && e.target.id; if (i === 'v-nom' || i === 'v-doc') actualizarAcepto(); else if (i === 'v-sug') actualizarSug(); });
 document.addEventListener('change', e => { if (e.target && e.target.id === 'v-chk') actualizarAcepto(); });
 document.addEventListener('click', e => { const i = e.target && e.target.id; if (i === 'v-btn-acepto') aceptar(); else if (i === 'v-btn-sug') sugerir(); else if (i === 'v-inst-btn') instalar(); else if (i === 'v-inst-no') { guardarMemo('cp_inst_no', Date.now()); prepararInstalacion(); } });
 prepararApp();

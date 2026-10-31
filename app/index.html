@@ -356,7 +356,7 @@ textarea{resize:vertical}
 <div id="impresion"></div>
 <noscript><p style="padding:20px">Esta página necesita JavaScript activado para funcionar.</p></noscript>
 <script>
-/* Casa Peñuela — versión 4.0 — construida el 2026-10-30 */
+/* Casa Peñuela — versión 4.0 — construida el 2026-10-31 */
 /* ===========================================================================
    Casa Peñuela — datos de la versión PÚBLICA de la app (la que se publica en internet).
    Aquí NO hay ningún dato de David ni de los inquilinos: ni nombres, ni cédula, ni dirección, ni teléfonos, ni firma.
@@ -1237,7 +1237,7 @@ function vistaPersona(id) {
   <div class="dos mt">
     <div class="card"><h3>Pendientes de esta persona</h3>${lista('entrada', 'Al ingresar')}${p.salida ? lista('salida', 'Al irse') : ''}
       <form data-f="tarea" data-id="${p.id}" class="fila mt2"><input name="texto" type="text" placeholder="Agregar un pendiente…" style="flex:1;min-width:160px"><select name="tipo" style="width:auto"><option value="entrada">de ingreso</option><option value="salida">de salida</option></select><button class="btn chico" type="submit">Agregar</button></form>
-      ${p.acuerdo ? `<p class="desde mt2">Aceptó el acuerdo de la casa el ${esc(fCorta(p.acuerdo.fecha))}${p.acuerdo.via === 'celular' ? ' desde su celular y firmó «' + esc(p.acuerdo.nombre || '') + '»' : ''}${p.acuerdo.version < S.acuerdoVersion ? ' — <b class="neg">cambió desde entonces</b>' : ''}.</p>` : (S.reglas.length ? '<p class="desde mt2">Aún no ha aceptado el acuerdo de la casa. <a href="#/conv/acuerdo">Ir al acuerdo</a></p>' : '')}
+      ${p.acuerdo ? `<p class="desde mt2">Aceptó el acuerdo de la casa el ${esc(fCorta(p.acuerdo.fecha))}${p.acuerdo.via === 'celular' ? ' desde su celular y firmó «' + esc(p.acuerdo.nombre || '') + '»' + (p.acuerdo.verificada === true ? ' (cédula verificada)' : (p.acuerdo.verificada === 'david' ? ' (la confirmaste tú)' : '')) : ''}${p.acuerdo.version < S.acuerdoVersion ? ' — <b class="neg">cambió desde entonces</b>' : ''}.</p>` : (S.reglas.length ? '<p class="desde mt2">Aún no ha aceptado el acuerdo de la casa. <a href="#/conv/acuerdo">Ir al acuerdo</a></p>' : '')}
     </div>
     <div class="card"><h3>Cosas a su cargo</h3>
       ${cosasACargo.length || prestadas.length ? '<ul class="lista">' + cosasACargo.map(x => `<li><div class="cuerpo">${esc(x.nombre)} <small>(${esc(x.ubicacion || '')})</small></div>${chip(x.estado === 'Bueno' ? 'verde' : (x.estado === 'Dañado' ? 'rojo' : 'ambar'), x.estado || 'Bueno')}</li>`).join('') + prestadas.map(x => `<li><div class="cuerpo">${x.tipo === 'entrega' ? 'Entregado' : 'Prestado'}: ${esc(x.cosa)} <small>desde ${esc(fCorta(x.fecha))}</small></div>${chip(x.tipo === 'entrega' ? 'gris' : 'ambar', x.tipo === 'entrega' ? 'lo tiene' : 'sin devolver')}</li>`).join('') + '</ul>' : '<p class="muted">Todavía no hay cosas asignadas ni prestadas. Se anotan en <a href="#/conv/cosas">Convivencia → Cosas</a>.</p>'}
@@ -1257,6 +1257,7 @@ function vistaPersona(id) {
 }
 
 /* ---------- formularios: persona ---------- */
+function soloDigitos(s) { return String(s == null ? '' : s).replace(/\D/g, ''); }
 function dlgPersona(id) {
   const ex = id ? persona(id) : null;
   const v = ex || { nombre: '', telefono: '', cuarto: '', ingreso: HOY(), salida: '', unidad: 'mes', ciclo: 'aniversario', diaPago: 5, momento: 'adelantado', primerMes: 'proporcional', precios: [{ monto: 0 }], deposito: { acordado: 0 }, notas: '' };
@@ -1267,6 +1268,7 @@ function dlgPersona(id) {
       <div class="tarjeta-precio">${F.din('Valor del cuarto por mes', 'precio', precio0, { grande: true, h: ex && ex.precios.length > 1 ? 'Es el valor inicial. Para cambiarlo desde una fecha usa «Cambiar el precio».' : 'Cada persona puede pagar un valor distinto. Ese valor es solo de esta persona.' })}</div>
       <div class="dos-col">${F.txt('Nombre', 'nombre', v.nombre, { ph: 'Ej: Camila Rojas' })}${F.txt('Habitación o lugar', 'cuarto', v.cuarto, { ph: 'Ej: Habitación 2' })}</div>
       <div class="dos-col">${F.fec('Fecha en que llegó a vivir aquí', 'ingreso', v.ingreso, { h: 'La primera vez que llegó. La app no controla entradas ni salidas del día a día.' })}${F.txt('Teléfono / WhatsApp', 'telefono', v.telefono, { ph: '300 123 4567' })}</div>
+      ${F.txt('Cédula', 'documento', v.documento || '', { ph: 'Solo números', h: 'Sirve para comprobar que quien firma el acuerdo desde su celular es esta persona. No sale en su cuenta.' })}
       ${F.chk('La fecha de llegada todavía no es definitiva (queda como recordatorio en los pendientes)', 'ingresoProvisional', !!v.ingresoProvisional)}
       <div class="info-caja" id="prevCiclo" aria-live="polite"></div>
       ${F.fec('Llevar la cuenta desde', 'cuentaDesde', ex ? (ex.cuentaDesde || ex.ingreso) : mx(v.ingreso, HOY()), { h: 'Todo cobro anterior a esta fecha se da por pagado. Si ya vivía aquí y está al día, deja la fecha de hoy: los días siguen contando desde que llegó. Si quieres que cobre desde el primer día, pon su fecha de llegada.' })}
@@ -1306,7 +1308,7 @@ function dlgPersona(id) {
       if (precio <= 0) return 'Pon el precio que paga.';
       const dp = +fd.get('diaPago'); if (fd.get('ciclo') === 'calendario' && (!(dp >= 1 && dp <= 31))) return 'El día de pago debe estar entre 1 y 31.';
       const cd = fd.get('cuentaDesde'); if (cd && !esFecha(cd)) return 'Revisa la fecha desde la que se lleva la cuenta.';
-      const d = { cuentaDesde: cd && cd > ingreso ? cd : null, ingresoProvisional: !!fd.get('ingresoProvisional'), nombre, telefono: fd.get('telefono').trim(), cuarto: fd.get('cuarto').trim(), ingreso, salida, unidad: fd.get('unidad'), ciclo: fd.get('ciclo'), diaPago: dp >= 1 && dp <= 31 ? dp : 5, momento: fd.get('momento'), primerMes: fd.get('primerMes'), notas: fd.get('notas').trim() };
+      const d = { cuentaDesde: cd && cd > ingreso ? cd : null, ingresoProvisional: !!fd.get('ingresoProvisional'), nombre, telefono: fd.get('telefono').trim(), documento: soloDigitos(fd.get('documento')), cuarto: fd.get('cuarto').trim(), ingreso, salida, unidad: fd.get('unidad'), ciclo: fd.get('ciclo'), diaPago: dp >= 1 && dp <= 31 ? dp : 5, momento: fd.get('momento'), primerMes: fd.get('primerMes'), notas: fd.get('notas').trim() };
       const dep = num(fd.get('dep'));
       if (ex) {
         mutar('Se actualizaron los datos de ' + nombre, () => {
@@ -2325,11 +2327,13 @@ function vistaFormularios(pl, ui) {
   const firmada = pl.aceptacion && pl.aceptacion.version >= ver ? pl.aceptacion : (u.acepto && u.acepto.version >= ver ? u.acepto : null);
   const vieja = !firmada && ((pl.aceptacion && pl.aceptacion.version < ver) || (u.acepto && u.acepto.version < ver));
   let acepto;
+  const pendiente = !!firmada && firmada === u.acepto && firmada !== pl.aceptacion;   // firmó desde este celular y David todavía no lo ha confirmado
   if (firmada) acepto = '<div class="v-card v-ok"><div class="v-k">Acuerdo de convivencia</div><div class="v-ok-t">✓ Aceptaste el acuerdo</div><div class="v-sub">'
-    + (firmada.fecha ? 'El ' + dEsc(fCorta(firmada.fecha)) : '') + (firmada.nombre ? (firmada.fecha ? ' · ' : '') + 'firmaste como «' + dEsc(firmada.nombre) + '»' : '') + '. Gracias.</div></div>';
+    + (firmada.fecha ? 'El ' + dEsc(fCorta(firmada.fecha)) : '') + (firmada.nombre ? (firmada.fecha ? ' · ' : '') + 'firmaste como «' + dEsc(firmada.nombre) + '»' : '') + '. ' + (pendiente ? dEsc((S.cfg && S.cfg.dueno) || 'David') + ' lo va a confirmar. ' : '') + 'Gracias.</div></div>';
   else acepto = '<div class="v-card v-form" id="v-acepto"><div class="v-k">Acuerdo de convivencia</div>'
-    + '<p class="v-p">' + (vieja ? 'El acuerdo cambió desde la última vez que lo aceptaste. Léelo de nuevo (arriba, en «Para leer») y, si estás de acuerdo, vuelve a aceptarlo.' : 'Léelo con calma (arriba, en «Para leer»). Si estás de acuerdo, escribe tu nombre completo y toca Aceptar.') + '</p>'
+    + '<p class="v-p">' + (vieja ? 'El acuerdo cambió desde la última vez que lo aceptaste. Léelo de nuevo (arriba, en «Para leer») y, si estás de acuerdo, vuelve a aceptarlo.' : 'Léelo con calma (arriba, en «Para leer»). Si estás de acuerdo, escribe tu nombre completo y tu número de cédula, como en tu documento, y toca Aceptar. Así queda claro que firmas tú.') + '</p>'
     + '<input id="v-nom" class="v-in" type="text" maxlength="80" autocomplete="name" autocapitalize="words" placeholder="Tu nombre completo" aria-label="Tu nombre completo">'
+    + '<input id="v-doc" class="v-in" type="text" inputmode="numeric" maxlength="16" autocomplete="off" placeholder="Tu número de cédula" aria-label="Tu número de cédula">'
     + '<label class="v-chk"><input id="v-chk" type="checkbox"><span>Leí el acuerdo de convivencia y lo acepto</span></label>'
     + '<button id="v-btn-acepto" class="v-btn" type="button" disabled>Aceptar el acuerdo</button><p id="v-msg-acepto" class="v-msg" role="status"></p></div>';
   const sugerencia = '<div class="v-card v-form" id="v-sugerir"><div class="v-k">Escríbele a ' + dueno + '</div>'
@@ -2427,7 +2431,7 @@ const SITIO_PUBLICO = 'https://davidp0220.github.io/casa-penuela/';
    =========================================================================== */
 const NUBE_SDK = '10.14.1';
 const NUBE_META = KEY + '_nube';
-const NUBE = { estado: 'apagada', detalle: '', app: null, au: null, fs: null, auth: null, db: null, user: null, meta: { rev: 0, hash: '', vistas: {} }, subiendo: false, temporizador: null, conflicto: null, desuscribir: null, ultima: null, vistasVerificadas: {}, aceptaciones: [], sugerencias: [], desuscribirEntradas: null };
+const NUBE = { estado: 'apagada', detalle: '', app: null, au: null, fs: null, auth: null, db: null, user: null, meta: { rev: 0, hash: '', vistas: {} }, subiendo: false, temporizador: null, conflicto: null, desuscribir: null, ultima: null, vistasVerificadas: {}, aceptaciones: [], aceptacionesListas: false, firmasPendientes: [], sugerencias: [], desuscribirEntradas: null };
 
 function nubePosible() {
   if (DEMO || typeof FIREBASE_CONFIG === 'undefined') return false;
@@ -2504,8 +2508,9 @@ function nubeTextoEstado() {
   }
 }
 function nubeBanner() {
-  const h = nubeBannerEstado(), n = NUBE.sugerencias.length;
-  return h + (n && NUBE.user ? '<div class="info">💬 Tienes ' + (n === 1 ? '1 sugerencia nueva' : n + ' sugerencias nuevas') + ' de tus inquilinos. <button class="btn chico primario" data-a="nubeSugerencias" type="button">Verlas</button></div>' : '');
+  const h = nubeBannerEstado(), n = NUBE.sugerencias.length, f = NUBE.firmasPendientes.length;
+  return h + (f && NUBE.user ? '<div class="warn">✍ ' + (f === 1 ? 'Hay 1 firma del acuerdo que espera' : 'Hay ' + f + ' firmas del acuerdo que esperan') + ' tu OK: no se pudo comprobar la cédula. <button class="btn chico primario" data-a="nubeFirmas" type="button">Revisar</button></div>' : '')
+    + (n && NUBE.user ? '<div class="info">💬 Tienes ' + (n === 1 ? '1 sugerencia nueva' : n + ' sugerencias nuevas') + ' de tus inquilinos. <button class="btn chico primario" data-a="nubeSugerencias" type="button">Verlas</button></div>' : '');
 }
 function nubeBannerEstado() {
   const e = NUBE.estado;
@@ -2531,7 +2536,7 @@ async function nubeIniciar() {
       if (user) nubeConectar(); else {
         if (NUBE.desuscribir) { NUBE.desuscribir(); NUBE.desuscribir = null; }
         if (NUBE.desuscribirEntradas) { NUBE.desuscribirEntradas(); NUBE.desuscribirEntradas = null; }
-        NUBE.aceptaciones = []; NUBE.sugerencias = []; nubeEstado('sinSesion');
+        NUBE.aceptaciones = []; NUBE.aceptacionesListas = false; NUBE.firmasPendientes = []; NUBE.sugerencias = []; nubeEstado('sinSesion');
       }
     });
     window.addEventListener('online', () => { if (NUBE.estado === 'sinConexion' && NUBE.user) nubeConectar(); });
@@ -2608,31 +2613,71 @@ function nubeEscucharEntradas() {
   if (NUBE.desuscribirEntradas) return;
   const { collection, onSnapshot } = NUBE.fs;
   const falla = donde => e => nubeDiag({ ev: 'error', donde, codigo: nubeCodigo(e), msg: String((e && e.message) || e).slice(0, 200) });
-  const u1 = onSnapshot(collection(NUBE.db, 'aceptaciones'), snap => { NUBE.aceptaciones = snap.docs.map(d => Object.assign({ id: d.id }, d.data())); nubeAplicarAceptaciones(); }, falla('aceptaciones'));
+  const u1 = onSnapshot(collection(NUBE.db, 'aceptaciones'), snap => { NUBE.aceptaciones = snap.docs.map(d => Object.assign({ id: d.id }, d.data())); if (!snap.metadata.fromCache) NUBE.aceptacionesListas = true; nubeRevisarFirmas(); }, falla('aceptaciones'));
   const u2 = onSnapshot(collection(NUBE.db, 'sugerencias'), snap => { NUBE.sugerencias = nubeOrdenarSugerencias(snap.docs.map(d => Object.assign({ id: d.id }, d.data()))); banners(); }, falla('sugerencias'));
   NUBE.desuscribirEntradas = () => { u1(); u2(); };
 }
 function nubeOrdenarSugerencias(l) { return l.slice().sort((a, b) => ((b.t && b.t.seconds) || 0) - ((a.t && a.t.seconds) || 0)); }
-/* Anota en la ficha de cada persona que aceptó el acuerdo desde su celular (con el nombre que firmó). Solo sube la versión: nunca baja ni pisa una aceptación que ya estaba. */
-function nubeAplicarAceptaciones() {
-  if (NUBE.estado !== 'conectada' || !NUBE.aceptaciones.length) return;
-  if (document.getElementById('dlg').open) { setTimeout(nubeAplicarAceptaciones, 3000); return; }
-  const mejor = {};   // por persona, la versión más alta que firmó
-  NUBE.aceptaciones.forEach(a => {
+/* La firma del acuerdo que llega del celular se comprueba con la cédula: la que escribió quien firmó contra la que David tiene anotada de esa persona.
+   · Coinciden → se anota sola en la ficha (cédula verificada).
+   · No coinciden, o David no tiene la cédula anotada → NO se anota: queda esperando el OK de David (puede aceptarla o descartarla; al descartarla esa persona puede firmar de nuevo).
+   · Si una firma anotada desde el celular desaparece de la nube, se quita de la ficha. Nunca baja ni pisa una aceptación que ya estaba. */
+function nubeFechaLocal(a) { const d = a.t && a.t.toDate ? a.t.toDate() : new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function nubeAnotarFirma(p, a, verificada) {
+  p.acuerdo = { fecha: nubeFechaLocal(a), version: a.version, nombre: a.nombre, documento: soloDigitos(a.documento), via: 'celular', verificada, docId: a.id };
+  const it = (p.lista || []).find(x => /reglas de la casa/i.test(x.texto)); if (it) it.hecho = true;
+}
+function nubeRevisarFirmas() {
+  if (NUBE.estado !== 'conectada' || !NUBE.aceptacionesListas) return;
+  if (document.getElementById('dlg').open) { setTimeout(nubeRevisarFirmas, 3000); return; }
+  const mejor = {}, pendientes = [];   // por persona, la versión más alta que se puede anotar sola
+  NUBE.aceptaciones.slice().sort((x, y) => x.version - y.version).forEach(a => {
     const p = S.personas.find(x => x.claveVista && x.claveVista === a.clave);
     if (!p || !(a.version >= 1) || (p.acuerdo && p.acuerdo.version >= a.version)) return;
-    if (!mejor[p.id] || mejor[p.id].version < a.version) mejor[p.id] = a;
+    const ref = soloDigitos(p.documento), dig = soloDigitos(a.documento);
+    if (ref && ref === dig) mejor[p.id] = a; else pendientes.push({ a, id: a.id, personaId: p.id, motivo: ref ? 'distinta' : 'sinCedula' });
   });
-  const ids = Object.keys(mejor); if (!ids.length) return;
-  const nombres = ids.map(id => persona(id).nombre).join(', ');
-  mutar('Aceptó el acuerdo desde su celular: ' + nombres, () => {
-    ids.forEach(id => {
-      const p = persona(id), a = mejor[id], d = a.t && a.t.toDate ? a.t.toDate() : new Date();
-      p.acuerdo = { fecha: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'), version: a.version, nombre: a.nombre, via: 'celular' };
-      const it = (p.lista || []).find(x => /reglas de la casa/i.test(x.texto)); if (it) it.hecho = true;
+  const quitar = S.personas.filter(p => p.acuerdo && p.acuerdo.via === 'celular' && !NUBE.aceptaciones.some(x => x.id === (p.acuerdo.docId || (p.claveVista + '_' + p.acuerdo.version))));
+  const antes = JSON.stringify(NUBE.firmasPendientes.map(x => x.id));
+  NUBE.firmasPendientes = pendientes;
+  const ids = Object.keys(mejor);
+  if (ids.length || quitar.length) {
+    mutar((ids.length ? 'Aceptó el acuerdo desde su celular (cédula verificada): ' + ids.map(id => persona(id).nombre).join(', ') : '') + (ids.length && quitar.length ? '. ' : '') + (quitar.length ? 'Se quitó la firma de ' + quitar.map(p => p.nombre).join(', ') + ': ya no está en la nube' : ''), () => {
+      ids.forEach(id => nubeAnotarFirma(persona(id), mejor[id], true));
+      quitar.forEach(q => { const p = persona(q.id); p.acuerdo = null; const it = (p.lista || []).find(x => /reglas de la casa/i.test(x.texto)); if (it) it.hecho = false; });
     });
-  });
+  } else if (antes !== JSON.stringify(pendientes.map(x => x.id))) banners();
 }
+ACC.nubeFirmas = () => {
+  const lista = NUBE.firmasPendientes;
+  if (!lista.length) { ACC.cerrarDlg(); toast('No hay firmas esperando.'); return; }
+  const miles = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  dialogo({
+    titulo: 'Firmas que esperan tu OK',
+    cuerpo: '<p class="peq">Alguien firmó el acuerdo desde un celular, pero no se puede comprobar solo que sea quien dice. Tú decides: si es la persona, acéptala; si no, descártala y esa persona puede firmar de nuevo.</p>' + lista.map(f => {
+      const p = persona(f.personaId), ref = soloDigitos(p.documento);
+      return '<div class="card" style="margin-top:10px"><b>' + esc(p.nombre) + '</b> <small class="muted">' + esc(nubeFechaLocal(f.a)) + '</small>'
+        + '<p style="margin:8px 0">Firmó como «<b>' + esc(f.a.nombre) + '</b>» con la cédula <b>' + esc(miles(soloDigitos(f.a.documento))) + '</b>.</p>'
+        + '<p class="' + (f.motivo === 'distinta' ? 'neg' : 'muted') + '" style="margin:0 0 10px">' + (f.motivo === 'distinta' ? '⚠ No coincide con la cédula que tienes anotada de ' + esc(p.nombre) + ' (' + esc(miles(ref)) + ').' : 'No tienes anotada la cédula de ' + esc(p.nombre) + ', así que no se puede comprobar. Si la aceptas, queda anotada como su cédula.') + '</p>'
+        + '<div class="fila"><button class="btn chico primario" data-a="nubeFirmaOk" data-id="' + esc(f.id) + '" type="button">Es la persona: aceptar</button><button class="btn chico" data-a="nubeFirmaNo" data-id="' + esc(f.id) + '" type="button">No es: descartar</button></div></div>';
+    }).join(''),
+    pie: '<button type="button" class="btn" data-a="cerrarDlg">Cerrar</button>'
+  });
+};
+ACC.nubeFirmaOk = d => {
+  const f = NUBE.firmasPendientes.find(x => x.id === d.id); if (!f) return;
+  NUBE.firmasPendientes = NUBE.firmasPendientes.filter(x => x.id !== d.id);
+  mutar('Aceptaste la firma de ' + persona(f.personaId).nombre + ' (la confirmaste tú)', () => { const p = persona(f.personaId); if (!soloDigitos(p.documento)) p.documento = soloDigitos(f.a.documento); nubeAnotarFirma(p, f.a, 'david'); });
+  ACC.nubeFirmas();
+};
+ACC.nubeFirmaNo = async d => {
+  const f = NUBE.firmasPendientes.find(x => x.id === d.id); if (!f) return;
+  try {
+    const { doc, deleteDoc } = NUBE.fs; await deleteDoc(doc(NUBE.db, 'aceptaciones', f.id));
+    NUBE.aceptaciones = NUBE.aceptaciones.filter(x => x.id !== f.id); NUBE.firmasPendientes = NUBE.firmasPendientes.filter(x => x.id !== d.id);
+    S.log.unshift({ t: new Date().toISOString(), texto: 'Descartaste una firma con la cédula ' + soloDigitos(f.a.documento) + ' en la cuenta de ' + persona(f.personaId).nombre + ': puede firmar de nuevo' }); guardar(); banners(); ACC.nubeFirmas();
+  } catch (e) { toast('No pude descartarla: ' + nubeCodigo(e), { error: true }); }
+};
 function nubeQuienEs(clave) { const p = S.personas.find(x => x.claveVista && x.claveVista === clave); return p ? p.nombre : 'Enlace anterior (ya cambiado)'; }
 function nubeSugerenciasDe(p) { return p && p.claveVista ? NUBE.sugerencias.filter(s => s.clave === p.claveVista) : []; }
 ACC.nubeSugerencias = () => {
@@ -2676,6 +2721,7 @@ ACC.nubeUsarAqui = async () => {
 function nubeCambio() {   // lo llama guardar() después de cada cambio
   if (NUBE.estado !== 'conectada') return;
   clearTimeout(NUBE.temporizador); NUBE.temporizador = setTimeout(nubeSubir, 1200);
+  if (NUBE.aceptacionesListas) setTimeout(nubeRevisarFirmas, 700);   // por si David acaba de anotar la cédula de alguien que tenía una firma esperando
 }
 /* Pregunta al servidor, por otro camino (REST, con la sesión de David), qué versión tiene guardada. No usa la memoria del SDK, que justo después de escribir puede devolver la versión vieja. */
 async function nubeRevEnServidor() {
