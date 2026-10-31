@@ -2450,8 +2450,13 @@ function nubeAsegurarClaves() {
 }
 
 /* ---------- estado y avisos ---------- */
+function nubeDiag(o) {   // solo en localhost (pruebas en el PC): le cuenta al servidor de prueba qué pasa con la nube; únicamente conteos y códigos de error, nunca datos
+  if (location.hostname !== 'localhost' || /HeadlessChrome/.test(navigator.userAgent)) return;
+  try { fetch('/__diag', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(Object.assign({ t: new Date().toISOString() }, o)), keepalive: true }).catch(() => { /* nada */ }); } catch (e) { /* nada */ }
+}
 function nubeEstado(est, detalle) {
   NUBE.estado = est; NUBE.detalle = detalle ? nubeCodigo(detalle) : '';
+  nubeDiag({ ev: 'estado', est, detalle: NUBE.detalle, personas: S.personas.length, metaRev: NUBE.meta.rev });
   if (typeof banners === 'function') banners();
   const t = document.getElementById('nubeEstadoTxt'); if (t) t.innerHTML = nubeTextoEstado();
 }
@@ -2484,13 +2489,13 @@ function nubeBanner() {
 /* ---------- arranque: cargar Firebase, ver si hay sesión ---------- */
 async function nubeIniciar() {
   if (!nubePosible()) { nubeEstado('apagada'); return; }
-  NUBE.meta = nubeMetaLeer(); nubeEstado('cargando');
+  NUBE.meta = nubeMetaLeer(); nubeDiag({ ev: 'inicio', navegador: navigator.userAgent.slice(0, 120), personas: S.personas.length, pagos: S.pagos.length, metaRev: NUBE.meta.rev }); nubeEstado('cargando');
   try {
     const u = 'https://www.gstatic.com/firebasejs/' + NUBE_SDK + '/';
     const [a, au, fs] = await Promise.all([import(u + 'firebase-app.js'), import(u + 'firebase-auth.js'), import(u + 'firebase-firestore.js')]);
     NUBE.app = a.initializeApp(FIREBASE_CONFIG); NUBE.au = au; NUBE.fs = fs; NUBE.auth = au.getAuth(NUBE.app); NUBE.db = fs.getFirestore(NUBE.app);
     au.onAuthStateChanged(NUBE.auth, user => {
-      NUBE.user = user;
+      NUBE.user = user; nubeDiag({ ev: 'sesion', hayUsuario: !!user, verificado: !!(user && user.emailVerified) });
       if (user) nubeConectar(); else { if (NUBE.desuscribir) { NUBE.desuscribir(); NUBE.desuscribir = null; } nubeEstado('sinSesion'); }
     });
     window.addEventListener('online', () => { if (NUBE.estado === 'sinConexion' && NUBE.user) nubeConectar(); });
@@ -2501,9 +2506,11 @@ ACC.nubeEntrar = async () => {
   if (!NUBE.auth) { toast('La nube todavía está cargando. Espera un momento y vuelve a probar.'); return; }
   try {
     const prov = new NUBE.au.GoogleAuthProvider(); prov.setCustomParameters({ prompt: 'select_account' });
+    nubeDiag({ ev: 'clic-entrar' });
     await NUBE.au.signInWithPopup(NUBE.auth, prov);
+    nubeDiag({ ev: 'popup-ok' });
   } catch (e) {
-    const c = nubeCodigo(e);
+    const c = nubeCodigo(e); nubeDiag({ ev: 'error', donde: 'entrar', codigo: c, msg: String((e && e.message) || e).slice(0, 300) });
     if (c === 'unauthorized-domain') nubeEstado('dominio');
     else if (c === 'popup-closed-by-user' || c === 'cancelled-popup-request') toast('No terminaste de entrar con Google.');
     else if (c === 'popup-blocked') toast('El navegador bloqueó la ventana de Google. Permítela y vuelve a tocar «Entrar con Google».', { error: true });
@@ -2519,10 +2526,12 @@ async function nubeConectar() {
   const { doc, getDocFromServer } = NUBE.fs;
   try {
     const s = await getDocFromServer(doc(NUBE.db, 'estado', 'principal'));
+    nubeDiag({ ev: 'conectar', existe: s.exists(), revNube: s.exists() ? s.data().rev : null, nubeVacia: s.exists() ? nubeJsonVacio(s.data().json) : null, metaRev: NUBE.meta.rev, hayDatos: nubeHayDatos(), personas: S.personas.length });
     if (!s.exists()) { NUBE.meta.rev = 0; NUBE.meta.hash = ''; }       // la nube no tiene nada: si aquí hay datos se suben tal cual (un aparato vacío no crea nada)
     else {
       const d = s.data(), sucio = nubeSucio();
-      if (nubeJsonVacio(d.json) && nubeHayDatos() && (NUBE.meta.rev === 0 || d.rev === NUBE.meta.rev)) { NUBE.meta.rev = d.rev; NUBE.meta.hash = ''; }   // la nube quedó vacía y aquí hay datos: se suben, sin preguntar
+      if (d.rev !== NUBE.meta.rev && nubeHash(nubePartir().estado) === nubeHash(d.json)) { NUBE.meta.rev = d.rev; NUBE.meta.hash = nubeHash(nubePartir().estado); }   // lo de aquí y lo de la nube son idénticos: no hay nada que escoger, solo se anota la versión
+      else if (nubeJsonVacio(d.json) && nubeHayDatos() && (NUBE.meta.rev === 0 || d.rev === NUBE.meta.rev)) { NUBE.meta.rev = d.rev; NUBE.meta.hash = ''; }   // la nube quedó vacía y aquí hay datos: se suben, sin preguntar
       else if (d.rev === NUBE.meta.rev) { /* misma versión: si hay cambios aquí, se suben más abajo */ }
       else if (d.rev > NUBE.meta.rev && (NUBE.meta.rev > 0 ? !sucio : !nubeHayDatos())) await nubeAdoptar(d);   // aparato nuevo y vacío: toma lo de la nube sin preguntar
       else { NUBE.conflicto = d.rev; nubeEstado('conflicto'); nubeResolver(); return; }
@@ -2530,7 +2539,7 @@ async function nubeConectar() {
     NUBE.ultima = Date.now(); nubeMetaGuardar(); nubeEstado('conectada'); nubeEscuchar();
     await nubeSubir();
   } catch (e) {
-    const c = nubeCodigo(e);
+    const c = nubeCodigo(e); nubeDiag({ ev: 'error', donde: 'conectar', codigo: c, msg: String((e && e.message) || e).slice(0, 300) });
     if (c === 'permission-denied') { nubeEstado('sinPermiso'); try { await NUBE.au.signOut(NUBE.auth); } catch (_) { /* nada */ } }
     else nubeEstado('sinConexion', e);
   }
@@ -2583,6 +2592,14 @@ function nubeCambio() {   // lo llama guardar() después de cada cambio
   if (NUBE.estado !== 'conectada') return;
   clearTimeout(NUBE.temporizador); NUBE.temporizador = setTimeout(nubeSubir, 1200);
 }
+/* Pregunta al servidor, por otro camino (REST, con la sesión de David), qué versión tiene guardada. No usa la memoria del SDK, que justo después de escribir puede devolver la versión vieja. */
+async function nubeRevEnServidor() {
+  const token = await NUBE.user.getIdToken();
+  const r = await fetch('https://firestore.googleapis.com/v1/projects/' + FIREBASE_CONFIG.projectId + '/databases/(default)/documents/estado/principal?mask.fieldPaths=rev', { headers: { Authorization: 'Bearer ' + token }, cache: 'no-store' });
+  if (!r.ok) throw new Error('rest-' + r.status);
+  const d = await r.json();
+  return Number((d.fields && d.fields.rev && d.fields.rev.integerValue) || 0);
+}
 async function nubeSubir() {
   if (NUBE.estado !== 'conectada' || NUBE.subiendo || !NUBE.user) return;
   NUBE.subiendo = true;
@@ -2590,10 +2607,11 @@ async function nubeSubir() {
     nubeAsegurarClaves();
     const { estado, imagenes } = nubePartir(), h = nubeHash(estado);
     if (h !== NUBE.meta.hash) {
-      if (!nubeHayDatos() && !(NUBE.meta.rev > 0)) { NUBE.meta.hash = h; nubeMetaGuardar(); }   // no hay nada que guardar y la nube nunca tuvo nada de aquí: no se crea un estado vacío
+      nubeDiag({ ev: 'subir', personas: S.personas.length, metaRev: NUBE.meta.rev, hayDatos: nubeHayDatos() });
+      if (!nubeHayDatos() && !(NUBE.meta.rev > 0)) { NUBE.meta.hash = h; nubeMetaGuardar(); nubeDiag({ ev: 'omitido', motivo: 'sin datos' }); }   // no hay nada que guardar y la nube nunca tuvo nada de aquí: no se crea un estado vacío
       else {
         if (estado.length > 900000 || imagenes.length > 900000) throw new Error('Los datos pesan demasiado para la nube (límite 1 MB por documento): quita imágenes grandes');
-        const { doc, runTransaction, serverTimestamp, getDocFromServer } = NUBE.fs;
+        const { doc, runTransaction, serverTimestamp } = NUBE.fs;
         const refE = doc(NUBE.db, 'estado', 'principal'), refI = doc(NUBE.db, 'estado', 'imagenes');
         const hoy = new Date().toISOString().slice(0, 10), refU = doc(NUBE.db, 'estado', 'copia-ultima'), refD = doc(NUBE.db, 'estado', 'copia-dia-' + new Date().getDay());
         const nueva = await runTransaction(NUBE.db, async tx => {
@@ -2609,14 +2627,16 @@ async function nubeSubir() {
           tx.set(refI, { rev: rev + 1, json: imagenes });
           return rev + 1;
         });
-        const leido = await getDocFromServer(refE);                                       // "guardado" solo si se vuelve a leer del servidor y está
-        if (!leido.exists() || leido.data().rev !== nueva) throw new Error('no-confirmado');
-        NUBE.meta.rev = nueva; NUBE.meta.hash = h; nubeMetaGuardar();
+        let enServidor = null; try { enServidor = await nubeRevEnServidor(); } catch (e) { nubeDiag({ ev: 'releer-fallo', msg: String((e && e.message) || e).slice(0, 200) }); }
+        nubeDiag({ ev: 'releido', esperada: nueva, enServidor });
+        if (enServidor !== null && enServidor !== nueva) throw new Error('no-confirmado');   // el servidor dice otra versión: no se marca como guardado
+        NUBE.meta.rev = nueva; NUBE.meta.hash = h; nubeMetaGuardar(); nubeDiag({ ev: 'subido', rev: nueva });
       }
     }
     await nubePublicarVistas();
     NUBE.ultima = Date.now(); nubeEstado('conectada');
   } catch (e) {
+    nubeDiag({ ev: 'error', donde: 'subir', codigo: nubeCodigo(e), msg: String((e && e.message) || e).slice(0, 300) });
     if (e && e.conflicto) { NUBE.conflicto = e.rev; nubeEstado('conflicto'); nubeResolver(); }
     else if (nubeCodigo(e) === 'permission-denied') nubeEstado('sinPermiso');
     else nubeEstado('sinConexion', e);
@@ -2634,12 +2654,14 @@ async function nubePublicarVistas() {
     vivas[p.id] = true;
     const pl = vistaPayload(S, p, ahora), sinHora = JSON.stringify(Object.assign({}, pl, { generado: '' })), h = nubeHash(sinHora);
     const previo = NUBE.meta.vistas[p.id];
-    if (previo && previo.clave === p.claveVista && previo.hash === h) continue;     // no cambió nada de esta persona: no se vuelve a escribir
+    const corta = (p.claveVista || '').slice(0, 4) + '…' + (p.claveVista || '').slice(-3);
+    if (previo && previo.clave === p.claveVista && previo.hash === h) { nubeDiag({ ev: 'vista', id: p.id, clave: corta, accion: 'omitida' }); continue; }     // no cambió nada de esta persona: no se vuelve a escribir
+    nubeDiag({ ev: 'vista', id: p.id, clave: corta, accion: 'escribiendo', tienePrevio: !!previo });
     const json = JSON.stringify(pl);
     if (json.length > 900000) throw new Error('La cuenta de ' + p.nombre + ' pesa demasiado (revisa las imágenes de los QR)');
     await setDoc(doc(NUBE.db, 'vistas', p.claveVista), { json, t: serverTimestamp() });
     if (previo && previo.clave && previo.clave !== p.claveVista) await deleteDoc(doc(NUBE.db, 'vistas', previo.clave));   // la clave cambió: el enlace viejo deja de servir
-    NUBE.meta.vistas[p.id] = { clave: p.claveVista, hash: h }; nubeMetaGuardar();
+    NUBE.meta.vistas[p.id] = { clave: p.claveVista, hash: h }; nubeMetaGuardar(); nubeDiag({ ev: 'vista', id: p.id, accion: 'escrita' });
   }
   for (const id of Object.keys(NUBE.meta.vistas)) {
     if (vivas[id]) continue;                                                        // la persona ya no está: su enlace deja de servir
@@ -2765,6 +2787,16 @@ function crearPersonaInicial(d) {
       const p = S.personas.find(q => q.id === x.personaId); if (!p || S.cfg.semillasAplicadas.includes(x.id)) return;
       const it = (p.lista || []).find(t => t.texto === x.texto); if (it) it.hecho = true;
       S.cfg.semillasAplicadas.push(x.id); S.log.unshift({ t: new Date().toISOString(), texto: 'Marcado como hecho para ' + p.nombre + ': ' + x.texto });
+    });
+  }
+  if (!DEMO && typeof CORRECCIONES_INICIALES !== 'undefined') {
+    if (!Array.isArray(S.cfg.semillasAplicadas)) S.cfg.semillasAplicadas = [];
+    CORRECCIONES_INICIALES.forEach(x => {
+      const p = S.personas.find(q => q.id === x.personaId); if (!p || S.cfg.semillasAplicadas.includes(x.id)) return;
+      S.cfg.semillasAplicadas.push(x.id);
+      if (p.ingreso !== x.ingresoAntes) { S.log.unshift({ t: new Date().toISOString(), texto: 'No se cambió la fecha de ingreso de ' + p.nombre + ': ya tenía otra fecha (' + p.ingreso + '), revísala' }); return; }
+      p.ingreso = x.ingresoNuevo; (p.precios || []).forEach(pr => { if (pr.desde === x.ingresoAntes) pr.desde = x.ingresoNuevo; });
+      S.log.unshift({ t: new Date().toISOString(), texto: 'Se corrigió la fecha de ingreso de ' + p.nombre + ': del ' + x.ingresoAntes + ' al ' + x.ingresoNuevo });
     });
   }
   // Limpieza de datos: sacar a quien David retiró y unir inquilinos duplicados seguros. Todo queda en la papelera y en el registro.
