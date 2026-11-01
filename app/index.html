@@ -1653,17 +1653,16 @@ const REGLAS_BASE = [
   ['Visitas y fiestas', 'Para una fiesta o reunión grande avisamos con mínimo 3 días, acordamos la hora de cierre y la organizamos juntos en la app. Todos ayudamos antes y después, y al día siguiente la casa queda limpia.'],
   ['Visitas y fiestas', 'En las fiestas los cuartos se cierran con llave y las cosas de valor se guardan.'],
   ['Consumo y cuidado entre todos', 'Somos adultos y cada uno responde por lo que consume. Consumimos en las zonas que acordamos (patio o terraza), no en los cuartos de otros, y nadie presiona a otro ni a los invitados a consumir.'],
-  ['Consumo y cuidado entre todos', 'Nadie maneja si consumió: pedimos un taxi o nos quedamos.', true],
   ['Consumo y cuidado entre todos', 'Si alguien se siente mal, no lo dejamos solo: lo acompañamos y, si es serio, llamamos a emergencias (123).'],
   ['Consumo y cuidado entre todos', 'En esta casa no se vende ni se guarda nada para vender. Es la única regla que no se negocia, porque la ley puede hacer responsable al dueño de la casa si en ella se vende o se guarda droga para vender.', true],
   ['Ruido y vecinos', 'Cuidamos el descanso de todos y de los vecinos: música y reuniones en un volumen que no se oiga afuera, y más bajito de noche (el horario lo acordamos entre todos).'],
   ['Ruido y vecinos', 'Con los vecinos somos amables. Si hay una queja, la escuchamos y la resolvemos juntos.'],
   ['La plata', 'Pagamos en la fecha acordada, sin que nadie tenga que recordarlo. Si un mes se complica, avisamos mínimo 2 días antes y buscamos una solución juntos.'],
   ['La plata', 'Los servicios (luz, agua, internet) están incluidos en el valor del cuarto: nadie paga nada aparte. A cambio, entre todos cuidamos el consumo para que la casa se pueda sostener.'],
-  ['Luz, agua y consumo', 'La lavadora se usa máximo 3 veces por semana por persona, y con la carga llena. Es lo que más sube la luz, y la luz va incluida en tu cuarto: entre todos la cuidamos. Esto no se negocia.', true, 'Lavadora: máximo 3 veces por semana'],
+  ['Luz, agua y consumo', 'La lavadora se usa máximo 3 veces por semana por persona, y con la carga llena.', false, 'Lavadora: máximo 3 veces por semana'],
   ['Luz, agua y consumo', 'Al salir de un espacio se apaga lo que no se usa: luces, ventiladores, televisor y cargadores.', false, 'Al salir, apaga lo que no uses'],
   ['Luz, agua y consumo', 'Duchas cortas y llaves bien cerradas: el agua también es de todos.', false, 'Duchas cortas y llaves bien cerradas'],
-  ['Luz, agua y consumo', 'Los aparatos que gastan mucha energía (plancha, calentador, aire) se usan con criterio y sin dejarlos prendidos de más.'],
+  ['Luz, agua y consumo', 'Los aparatos que gastan mucha energía (plancha, calentador, secador de pelo) se usan poco y sin dejarlos prendidos de más.'],
   ['Seguridad', 'Las llaves son personales: no se prestan ni se copian. Si una se pierde, se avisa de inmediato.'],
   ['Seguridad', 'La puerta se cierra con llave al salir y en la noche. Quien sale último revisa estufa, luces y ventanas.'],
   ['Hablar y resolver', 'Si algo molesta, se habla directo, a tiempo y en privado, con respeto (nada de indirectas ni de reclamos por el grupo). Primero se conversa; si se repite, buscamos un acuerdo nuevo juntos.'],
@@ -1690,12 +1689,15 @@ const TEXTOS_CORREGIDOS = [
   { id: 'textos-v1-deposito-compromiso', viejo: 'Devolverte tu depósito completo al terminar, si todo está en orden y la cuenta en cero.', nuevo: null },
   { id: 'textos-v1-lavadora', viejo: 'La lavadora se usa máximo 3 veces por semana por persona, y con la carga llena. Es lo que más sube la luz, y la luz la ponemos entre todos. Esto no se negocia.', nuevo: 'La lavadora se usa máximo 3 veces por semana por persona, y con la carga llena. Es lo que más sube la luz, y la luz va incluida en tu cuarto: entre todos la cuidamos. Esto no se negocia.' },
   { id: 'textos-v1-cuentas', viejo: 'Ser claro con la plata: cobrar solo lo acordado, darte recibo de cada pago y mostrarte cómo se reparte cada servicio.', nuevo: 'Ser claro con la plata: cobrar solo lo acordado, darte recibo de cada pago y mostrarte las cuentas cuando quieras verlas.' }
+  ,{ id: 'textos-v2-manejar', viejo: 'Nadie maneja si consumió: pedimos un taxi o nos quedamos.', nuevo: null },
+  { id: 'textos-v2-lavadora', viejo: 'La lavadora se usa máximo 3 veces por semana por persona, y con la carga llena. Es lo que más sube la luz, y la luz va incluida en tu cuarto: entre todos la cuidamos. Esto no se negocia.', nuevo: 'La lavadora se usa máximo 3 veces por semana por persona, y con la carga llena.', firme: false },
+  { id: 'textos-v2-aparatos', viejo: 'Los aparatos que gastan mucha energía (plancha, calentador, aire) se usan con criterio y sin dejarlos prendidos de más.', nuevo: 'Los aparatos que gastan mucha energía (plancha, calentador, secador de pelo) se usan poco y sin dejarlos prendidos de más.' }
 ];
 function corregirTextosBase(s) {
   if (!Array.isArray(s.cfg.semillasAplicadas)) s.cfg.semillasAplicadas = [];
   TEXTOS_CORREGIDOS.forEach(c => {
     if (s.cfg.semillasAplicadas.includes(c.id)) return; s.cfg.semillasAplicadas.push(c.id);
-    [].concat(s.reglas || [], s.compromisos || []).forEach(x => { if (x.texto === c.viejo && c.nuevo) x.texto = c.nuevo; });
+    [].concat(s.reglas || [], s.compromisos || []).forEach(x => { if (x.texto === c.viejo && c.nuevo) { x.texto = c.nuevo; if (c.firme !== undefined && 'firme' in x) x.firme = c.firme; } });
     if (!c.nuevo) { s.reglas = (s.reglas || []).filter(x => x.texto !== c.viejo); s.compromisos = (s.compromisos || []).filter(x => x.texto !== c.viejo); }
   });
 }
